@@ -1,0 +1,5 @@
+package bean_req;
+
+public class req_bc_recmoney {
+
+}
