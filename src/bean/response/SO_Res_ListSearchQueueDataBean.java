@@ -28,6 +28,7 @@ public class SO_Res_ListSearchQueueDataBean {
 	private int bill_type;
 	private String cancel_remark;
 	private String who_cancel;
+	private String sale_order;
 	
 	List owner_phone;
 	List receiver_phone;
@@ -46,7 +47,7 @@ public class SO_Res_ListSearchQueueDataBean {
 			int source, String receiver_name, String doc_date, String pickup_datetime, double total_amount,
 			int is_loaded, String car_brand, String plate_number, int status_for_saleorder_current,
 			double total_before_amount, double total_after_amount, String otp_password, int bill_type,
-			String cancel_remark, String who_cancel, List owner_phone, List receiver_phone,
+			String cancel_remark, String who_cancel, String sale_order, List owner_phone, List receiver_phone,
 			List<SO_Res_ListQueueStatusBean> status_for_saleorder_history, List<SO_Res_ListProductQueueBean> item) {
 		super();
 		this.queue_id = queue_id;
@@ -74,6 +75,7 @@ public class SO_Res_ListSearchQueueDataBean {
 		this.bill_type = bill_type;
 		this.cancel_remark = cancel_remark;
 		this.who_cancel = who_cancel;
+		this.sale_order = sale_order;
 		this.owner_phone = owner_phone;
 		this.receiver_phone = receiver_phone;
 		this.status_for_saleorder_history = status_for_saleorder_history;
@@ -329,7 +331,14 @@ public class SO_Res_ListSearchQueueDataBean {
 	public void setWho_cancel(String who_cancel) {
 		this.who_cancel = who_cancel;
 	}
+	
+	public String getSale_order() {
+		return sale_order;
+	}
 
+	public void setSale_order(String sale_order) {
+		this.sale_order = sale_order;
+	}
 
 	public List getOwner_phone() {
 		return owner_phone;

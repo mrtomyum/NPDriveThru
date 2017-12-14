@@ -34,6 +34,7 @@ import bean.IV_Resp_BillingBean;
 import bean.IV_Resp_InUpBillingBean;
 import bean.IV_Resp_PrintSlipBean;
 import bean.LoginBean;
+import bean.LoginResponseBean;
 import bean.PK_Resp_CarBrandBean;
 import bean.PK_Resp_GetDataQueue;
 import bean.PK_Resp_GetItemBarcodeBean;
@@ -46,6 +47,7 @@ import bean.UserSearchBean;
 import bean.UserSearchResponseBean;
 import bean.User_Resp_CheckDataAccessTokenBean;
 import bean.request.CT_Req_LoginBean;
+import bean.request.CT_Req_LoginPassBean;
 import bean.request.CT_Req_SearchArBean;
 import bean.request.CT_Req_SearchBean;
 import bean.request.CT_Req_SearchInvoiceBean;
@@ -88,12 +90,14 @@ import bean.response.SO_Res_ListARDepositBean;
 import bean.response.SO_Res_ListCarBrandBean;
 import bean.response.SO_Res_ListItemInvoiceBean;
 import bean.response.SO_Res_ListOwnerPhoneBean;
+import bean.response.SO_Res_ListPickZoneBean;
 import bean.response.SO_Res_ListProductQueueBean;
 import bean.response.SO_Res_ListQueueBean;
 import bean.response.SO_Res_ListQueueStatusBean;
 import bean.response.SO_Res_ListSaleOrderBean;
 import bean.response.SO_Res_ListSaleOrderItemBean;
 import bean.response.SO_Res_ListSearchQueueDataBean;
+import bean.response.SO_Res_PickZoneBean;
 import bean.response.SO_Res_PickingManageProductBean;
 import bean.response.SO_Res_ProductQueueBean;
 import bean.response.SO_Res_QueueBean;
@@ -124,6 +128,9 @@ public class DriveThruController {
 	DT_Res_CompanyBean company = new DT_Res_CompanyBean();
 	List<DT_Res_ListCompanyBean> list_Company = new ArrayList<DT_Res_ListCompanyBean>();
 	DT_Res_ZoneBean zone = new DT_Res_ZoneBean();
+	
+	SO_Res_PickZoneBean pick_zone = new SO_Res_PickZoneBean();
+	List<SO_Res_ListPickZoneBean>list_Zone = new ArrayList<SO_Res_ListPickZoneBean>();
 	
 	SO_Res_SaleOrderDetailsBean so = new SO_Res_SaleOrderDetailsBean();
 	List<SO_Res_ListSaleOrderItemBean> listSO = new ArrayList<SO_Res_ListSaleOrderItemBean>();
@@ -199,7 +206,6 @@ public class DriveThruController {
 	double sumRemain=0;
 	
 	
-	
 	SO_Res_BillingBean respBill = new SO_Res_BillingBean();
 	SO_Res_InvoiceBean invoice = new SO_Res_InvoiceBean();
 	GenNewDocnoController genDoc = new GenNewDocnoController();
@@ -272,6 +278,212 @@ public class DriveThruController {
 		
 		
 		return company;
+	}
+	
+	public SO_Res_PickZoneBean searchItemPickZone(CT_Req_ServerDataBaseBean db){
+		String vQuery;
+		
+		try {
+			Statement st = conn.getSqlStatement(db.getServerName(), db.getDatabaseName());
+			vQuery = "exec dbo.USP_NP_SearchItemPickZone";
+			ResultSet rs = st.executeQuery(vQuery);
+			System.out.println(vQuery);
+			SO_Res_ListPickZoneBean evt;
+			list_Zone.clear();
+			while(rs.next()){
+				evt = new SO_Res_ListPickZoneBean();
+				evt.setPick_zone_id(rs.getString("pickzone"));
+				evt.setName(rs.getString("name"));
+			
+				list_Zone.add(evt);
+			}
+			
+			pick_zone.setError(false);
+			pick_zone.setSuccess(true);
+			pick_zone.setMessage("");
+			
+			rs.close();
+			st.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			pick_zone.setError(true);
+			pick_zone.setSuccess(false);
+			pick_zone.setMessage(e.getMessage());
+		}finally{
+			ds.close();
+		}
+
+		pick_zone.setPick_zone(list_Zone);
+		
+		
+		return pick_zone;
+	}
+	
+	
+	private void loginResponseTemplage(String keyword) {
+		response.setIsSuccess(false);
+ 		response.setProcessDesc("Not found :" +keyword);
+ 		
+ 		user.setId(-1);
+		    user.setCode(null);
+		    user.setName(null);
+		    user.setPassword(null);
+		    user.setImage_filename(null);
+		    user.setEmail(null);
+		    user.setRole(-1);
+		    user.setActiveStatus(-1);
+		    user.setIsConfirm(-1);
+		    user.setCreatorCode(null);
+		    user.setCreatedateTime(null);
+		    user.setLasteditorCode(null);
+		    user.setLasteditdateTime(null);
+	}
+	
+	
+	BranchController checkbranch = new BranchController();
+	CT_Resp_ResponseBean response = new CT_Resp_ResponseBean();
+	LoginResponseBean loginResponse = new LoginResponseBean();
+	
+	public LoginResponseBean userlogin(String dbName,CT_Req_LoginPassBean login) {//LoginBean
+		java.text.SimpleDateFormat dt= new java.text.SimpleDateFormat();
+		dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
+		Date dateNow = new Date();
+		String branchCode="S01";
+		
+		String vQuery;
+		String vUserID="";
+
+		try {
+			branchCode = checkbranch.getBranchID(dbName, login.getBranch_id()).getCode().toUpperCase();
+			Statement stmt = ds.getStatement(dbName);
+		    
+			Textstring="select * from User where code='"+login.getUser_code()+"' and branchCode='"+branchCode+"'";
+		    
+		   	System.out.println("SQL LogIn :" + Textstring);
+		   	System.out.println("สาขาที่เข้าใช้งาน : "+login.getBranch_id());
+		    
+		    ResultSet rs = stmt.executeQuery(Textstring);
+		    
+		    response.setProcess("login");
+		        if ( rs.next() != false ) 
+		        	{	
+		        		response.setIsSuccess(true);
+		        		response.setProcessDesc("successful");
+		        		
+		        		user.setId(rs.getInt("id"));
+		    		    user.setCode(rs.getString("code"));
+		    		    user.setName(rs.getString("name"));
+		    		    user.setPassword(rs.getString("password"));
+		    		    user.setImage_filename(rs.getString("picturePath"));
+		    		    user.setEmail(rs.getString("email"));
+		    		    user.setRole(rs.getInt("role"));
+		    		    user.setActiveStatus(rs.getInt("activeStatus"));
+		    		    user.setIsConfirm(rs.getInt("isConfirm"));
+		    		    user.setCreatorCode(rs.getString("creatorCode"));
+		    		    user.setCreatedateTime(rs.getString("createdateTime"));
+		    		    user.setLasteditorCode(rs.getString("lasteditorCode"));
+		    		    user.setLasteditdateTime(rs.getString("lasteditdateTime"));
+		        		
+		        		String uuid = UUID.randomUUID().toString(); 
+		        		loginResponse.setAccessToken(uuid);
+		    		    loginResponse.setAccessDatetime(dt.format(dateNow));
+
+		    			 
+		        	} else 
+		        	{
+		        		loginResponseTemplage(login.getUser_code());
+		        	}
+		        
+	       	
+		    loginResponse.setResponse(response); 
+		    loginResponse.setUser(user); 
+		    loginResponse.setPathFile("http://qserver.nopadol.com/drivethru/tmp/");
+		    loginResponse.setPathPHPUpload("http://qserver.nopadol.com/drivethru/upload.php");
+		    
+		    System.out.println("uuid = " + loginResponse.getAccessToken() + " : "+ loginResponse.getResponse().getProcessDesc()+ "-"+loginResponse.getAccessDatetime() ); 
+
+		    rs.close();
+		    stmt.close();
+		    
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			
+		    ds.close();
+		}
+		
+		// เก็บ log UserAccess
+		boolean connect;
+		CT_Req_ServerDataBaseBean db = new CT_Req_ServerDataBaseBean();
+		
+		System.out.println("Branch Code = "+branchCode);
+		
+		if (branchCode.equals("S01")){
+			db.setServerName("192.168.0.7");
+			db.setDatabaseName("bcnp");
+		}
+		
+		if (branchCode.equals("S02")){
+			db.setServerName("192.168.0.7");
+			db.setDatabaseName("bcnp");
+		}
+		
+		try {
+			vQuery = "exec dbo.USP_NP_SearchSaleDataLogIn '"+login.getUser_code()+"'";
+			System.out.println("Sale"+vQuery);
+			Statement st = conn.getSqlStatement(db.getServerName(), db.getDatabaseName());
+			ResultSet rs = st.executeQuery(vQuery);
+			while(rs.next()){
+				vUserID = rs.getString("code");
+				
+				System.out.println("vUserID"+vUserID);
+			}
+			rs.close();
+			st.close();
+			
+		} catch (SQLException e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			isSuccess=false;
+			response.setIsSuccess(isSuccess); 
+			response.setProcess("login");
+			response.setProcessDesc("Login failed");
+			
+		}finally{
+			conn.close();
+		}
+		
+		connect = conn.checkConnect(db.getServerName(),db.getDatabaseName(),vUserID,login.getPassword());
+		
+		System.out.println("connect = "+connect);
+		
+		if (loginResponse.getAccessToken()!=null && connect == true){
+		
+		Textstring="insert UserAccess(userId,userCode,userUUID,branchCode,dateTimeStamp)"
+				+" select '" +loginResponse.getUser().getId()+"','"+loginResponse.getUser().getCode()
+					+"','"+loginResponse.getAccessToken()+"','"+branchCode+"','"+loginResponse.getAccessDatetime()+"'";
+		
+						
+		 System.out.println(Textstring);
+		 System.out.println("BranchID = "+branchCode);
+		
+		// return true;
+		 try {
+			isSuccess= excecute.execute(dbName,Textstring);
+		} catch (Exception e) {
+			isSuccess=false;
+			loginResponseTemplage(login.getUser_code());
+		}
+		}else {
+			isSuccess=false;
+			response.setIsSuccess(isSuccess); 
+			response.setProcess("login");
+			response.setProcessDesc("Login failed");
+		}
+		
+		return loginResponse;
+		
 	}
 	
 	public CT_Res_LoginBean login(String db,CT_Req_LoginBean req) {
@@ -445,7 +657,7 @@ public class DriveThruController {
 				evt.setApprove_code(rs.getString("approvecode"));
 				evt.setApprove_datetime(rs.getString("approvedatetime"));
 				evt.setDiscount_amount(rs.getDouble("discountamount"));
-				evt.setDeliver_type(rs.getInt("isconditionsend"));
+				evt.setDelivery_type(rs.getInt("isconditionsend"));
 				evt.setIs_confirm(rs.getInt("isconfirm"));
 				evt.setBill_type(rs.getInt("billtype"));
 				evt.setIs_load(rs.getInt("isload"));
@@ -519,6 +731,7 @@ public class DriveThruController {
 					evt_item.setItem_remark(rs_sub.getString("remark"));
 					evt_item.setItem_short_code(rs_sub.getString("shortcode"));
 					evt_item.setItem_barcode(rs_sub.getString("barcode"));
+					evt_item.setPick_zone_id(rs_sub.getString("zoneid"));
 					list_item_so.add(evt_item);
 				}
 				
@@ -595,12 +808,13 @@ public class DriveThruController {
 //		}
 		
 		check_itemsaleorder = data.verifyItemSaleOrder(db, req);
-		if (req.getPlate_number()!="" && req.getCar_brand() != "" && req.getReceiver_name() !="" && req.getReceiver_phone().size()>0){
+		if ((req.getDelivery_type() == 0 && req.getPlate_number() != "" && req.getCar_brand() != "") || (req.getDelivery_type()==1)) {
+		if (req.getReceiver_name() !="" && req.getReceiver_phone().size()>0){
 			if (req.getItem().size()!=0){
 				if(check_itemsaleorder.getIsSuccess()==true){
 
 					//			db.setDbName("bcnp");
-					//			db.setServerName("192.168.0.7");
+					//			db.setServerName("192.168.0.7"); DT_User_LoginBranchBean db
 
 					vGenNewDocNo = gen_no.genDocNo(0);
 					qId = gen_no.genqId();
@@ -687,8 +901,8 @@ public class DriveThruController {
 										if (req.getItem().get(i).getItem_code()!=null && req.getItem().get(i).getItem_code()!=""){
 											if (vCheckExistItem==0 && req.getItem().get(i).getRequest_qty()>0){
 
-												vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,reqQty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,whcode,shelfcode) "+ "values("
-														+qId+",'"+vGenNewDocNo+"',CURDATE(),'"+ req.getItem().get(i).getItem_code()+"','"+item_saleorder.getItem_name()+"','"+req.getItem().get(i).getItem_unit_code()+"','"+req.getItem().get(i).getItem_barcode()+"',"+ item_saleorder.getRemain_qty()+","+req.getItem().get(i).getRequest_qty()+",0,0,0,"+itemPrice+","+itemAmount+","+item_saleorder.getItem_rate()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,0,"+req.getItem().get(i).getLine_number()+",'"+saleCode+"','"+saleName+"','"+item_saleorder.getItem_expert_code()+"','"+item_saleorder.getItem_department_code()+"','"+item_saleorder.getItem_depart_name()+"','"+item_saleorder.getItem_category_code()+"','"+item_saleorder.getItem_category_name()+"','"+item_saleorder.getSec_code()+"','"+item_saleorder.getSec_name()+"',"+item_saleorder.getItem_average()+",'"+item_saleorder.getWh_code()+"','"+item_saleorder.getShelf_code()+"' )";
+												vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,reqQty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,whcode,shelfcode,zoneid,pickzone) "+ "values("
+														+qId+",'"+vGenNewDocNo+"',CURDATE(),'"+ req.getItem().get(i).getItem_code()+"','"+item_saleorder.getItem_name()+"','"+req.getItem().get(i).getItem_unit_code()+"','"+req.getItem().get(i).getItem_barcode()+"',"+ item_saleorder.getRemain_qty()+","+req.getItem().get(i).getRequest_qty()+",0,0,0,"+itemPrice+","+itemAmount+","+item_saleorder.getItem_rate()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,0,"+req.getItem().get(i).getLine_number()+",'"+saleCode+"','"+saleName+"','"+item_saleorder.getItem_expert_code()+"','"+item_saleorder.getItem_department_code()+"','"+item_saleorder.getItem_depart_name()+"','"+item_saleorder.getItem_category_code()+"','"+item_saleorder.getItem_category_name()+"','"+item_saleorder.getSec_code()+"','"+item_saleorder.getSec_name()+"',"+item_saleorder.getItem_average()+",'"+item_saleorder.getWh_code()+"','"+item_saleorder.getShelf_code()+"','"+item_saleorder.getZone_id()+"','"+item_saleorder.getPick_zone()+"' )";
 												System.out.println("QuerySub :"+vQuery);
 												isSuccess= excecute.execute(dbName,vQuery);
 
@@ -1027,9 +1241,15 @@ public class DriveThruController {
 			isSuccess=false;
 			queue.setSuccess(false);
 			queue.setError(true);
-			queue.setMessage("This saleorder not have receive_name or plate_number or car_brand");
+			queue.setMessage("This saleorder not have receive_name or receive_phone");
 		}
-
+		}else {
+			isSuccess=false;
+			queue.setSuccess(false);
+			queue.setError(true);
+			queue.setMessage("This saleorder not have plate_number and car_brand");	
+		}
+		
 		queue.setQueue(queuedata);
 
 		return queue;
@@ -1037,8 +1257,14 @@ public class DriveThruController {
 	
 	public SO_Res_SearchQueueDataBean SearchQueueList(String dbName,SO_Req_SearchQueueDataBean req){
 		String vQuery;
+		DT_User_LoginBranchBean db = new DT_User_LoginBranchBean();
+		db.setDbName("bcnp");
+		db.setServerName("192.168.0.7"); 
+		boolean checkData;
+		
 		//call USP_DT_SearchListQueue('','','',0,'1')
 		try {
+					
 			Statement st = ds.getStatement(dbName);
 			vQuery = "call USP_DT_SearchListQueue ('"+req.getPickup_date()+"','"+req.getCreated_date()+"',"+req.getStatus_for_saleorder_current()+",'"+req.getPage()+"','"+req.getKeyword()+"',"+req.getQueue_id()+")";
 			System.out.println(vQuery);
@@ -1076,7 +1302,15 @@ public class DriveThruController {
 				evt.setBill_type(rs.getInt("billtype"));
 				evt.setWho_cancel(rs.getString("cancelcode"));
 				evt.setCancel_remark(rs.getString("cancelremark"));
-				System.out.println("ArName :"+rs.getInt("billtype"));
+				System.out.println("BillType :"+rs.getInt("billtype"));
+				
+				System.out.println("ID :"+req.getQueue_id());
+				
+				
+				if  (req.getQueue_id()!=null) {
+					System.out.println("Queue ID = "+ req.getQueue_id());
+					checkData = data.updateSaleOrderQtyRequestData(db, dbName, req.getQueue_id(), rs.getString("saleorder"));
+				}
 				
 				List<SO_Res_ListProductQueueBean>list_item = new ArrayList<SO_Res_ListProductQueueBean>();
 				
@@ -1108,6 +1342,7 @@ public class DriveThruController {
 					evt_item.setItem_unit_code(rs_item.getString("unitcode"));
 					evt_item.setLine_number(rs_item.getInt("linenumber"));
 					evt_item.setItem_qty(rs_item.getDouble("qty"));
+					evt_item.setPick_zone_id(rs_item.getString("zoneid"));
 					
 					list_item.add(evt_item);
 
@@ -1318,8 +1553,8 @@ public class DriveThruController {
 				while(rs_Sub.next()){
 					
 				evt = new SO_Res_ListProductQueueBean();
-				evt.setFile_path(rs_Sub.getString("filepath"));
-				//evt.setFile_path(data.getItemFilePath(rs_Sub.getString("itemCode")));
+				//evt.setFile_path(rs_Sub.getString("filepath"));
+				evt.setFile_path(data.getItemFilePath(rs_Sub.getString("itemCode")));
 				evt.setIs_cancel(rs_Sub.getInt("itemcancel"));
 				evt.setIs_check(rs_Sub.getInt("ischeckout"));
 				evt.setItem_barcode(rs_Sub.getString("barcode"));
@@ -1336,6 +1571,7 @@ public class DriveThruController {
 				evt.setItem_unit_code(rs_Sub.getString("unitcode"));
 				evt.setLine_number(rs_Sub.getInt("linenumber"));
 				evt.setItem_qty(rs_Sub.getDouble("qty"));
+				evt.setPick_zone_id(rs_Sub.getString("zoneid"));
 				
 				listproduct.add(evt);
 				}
@@ -1417,6 +1653,7 @@ public class DriveThruController {
 		String saleName="";
 		String creatorCode="";
 		double vQty=0.0;
+		String pick_zone_id;
 
 
 		dtDoc.applyPattern("yyyy-MM-dd");
@@ -1496,8 +1733,8 @@ public class DriveThruController {
 									
 									if (vCheckExistItem==0){
 										if ((itemExist.getItem_source()==0)||(itemExist.getItem_source()==1 && itemExist.getBill_type()==0)){
-											vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost) "+ "values("
-													+reqItem.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getItem_barcode()+"',"+ vQty+","+reqItem.getQty_before()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIs_cancel()+","+reqItem.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+" )";
+											vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,zoneId) "+ "values("
+													+reqItem.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getItem_barcode()+"',"+ vQty+","+reqItem.getQty_before()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIs_cancel()+","+reqItem.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+",'"+getBarData.getZoneId()+"' )";
 											//+reqItem.getqId()+",'"+getQueue.getDocNo()+"','"+dateFormat.format(dateNow)+"','"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getBarCode()+"',"+ reqItem.getQtyBefore()+","+reqItem.getQtyBefore()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIsCancel()+",0,'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+" )";
 											isSuccess= excecute.execute(dbName,vQuery);
 
@@ -1730,8 +1967,8 @@ public class DriveThruController {
 								
 								if (vCheckExistItem==0){
 									if(itemExist.getItem_source()==0 || (itemExist.getItem_source()==1 && itemExist.getBill_type()==0)){																				
-										vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,barcode,unitCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,checkoutAmount,rate1,checkerCode,checkoutDate,isCancel,isCheckOut,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost) "+ "values("
-												+reqQueue.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+reqQueue.getItem_barcode()+"','"+getBarData.getUnitCode()+"',"+ vQty+",0,0,"+reqQueue.getQty_after()+","+itemPrice+",0,"+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqQueue.getIs_cancel()+",1,"+reqQueue.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+" )";
+										vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,barcode,unitCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,checkoutAmount,rate1,checkerCode,checkoutDate,isCancel,isCheckOut,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,zoneId) "+ "values("
+												+reqQueue.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+reqQueue.getItem_barcode()+"','"+getBarData.getUnitCode()+"',"+ vQty+",0,0,"+reqQueue.getQty_after()+","+itemPrice+",0,"+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqQueue.getIs_cancel()+",1,"+reqQueue.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+",'"+getBarData.getZoneId()+"' )";
 										isSuccess= excecute.execute(dbName,vQuery);
 
 										vQuerySub = "update  Queue set status = 1,pickStatus=1,isload = 1,numberofitem = (select count(itemCode) as countItem from QItem where docNo = '"+getQueue.getDocNo()+"') where docNo ='"+getQueue.getDocNo()+"'";
@@ -2183,6 +2420,7 @@ public class DriveThruController {
 		String vQuery;
 		String vMyQuery;
 		String creatorCode;
+		int addItem;
 		int status;
 		int pick_status;
 		CT_Resp_ResponseBean check_itemsaleorder;
@@ -2223,6 +2461,8 @@ public class DriveThruController {
 
 												String vQueryOwner;
 												String vQueryReceive;
+												
+												data.UpdateSaleOrderData(dbName, db, req);
 
 												vQueryOwner="delete from OrderOwnerPhone where doc_date = CURDATE() and queue_id = '"+req.getQueue_id()+"'";
 												isSuccess= excecute.execute(dbName,vQueryOwner);
@@ -2564,6 +2804,7 @@ public class DriveThruController {
 	public SO_Res_ChangeStatusBean ChangeQueueStatus (String dbName,DT_User_LoginBranchBean db,SO_Req_ChangeStatusBean req){
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
 		getDataFromData getData = new getDataFromData();
+		PK_Resp_SaleCodeDetails saleCode = new PK_Resp_SaleCodeDetails();
 		
 		String vQuery;
 		String vQuerySub;
@@ -2581,6 +2822,14 @@ public class DriveThruController {
 		if (req.getQueue_id() != 0){
 			System.out.println("QueueID :"+req.getQueue_id());
 			getQueue = getData.searchQueue(req.getQueue_id());
+			
+			if(getQueue.getDelivery_type() == 1) {
+				saleCode = getData.searchSaleCode(req.getPassword());
+			}else {
+				saleCode.setSaleCode("");
+				saleCode.setSaleName("");
+			}
+			
 			if(req.getStatus_for_saleorder_current() != ""){
 				System.out.println("Status :"+req.getStatus_for_saleorder_current());
 				System.out.println("Password :"+req.getPassword());
@@ -2649,11 +2898,20 @@ public class DriveThruController {
 					//String checkOtp = bcrypt.checkPassword(req.getPassword(), getQueue.getOtp_password())? "Passwords Match" : "Passwords do not match";
 					//System.out.println("checkOtp status 1 = "+checkOtp);
 					
+					System.out.println("SaleName :"+saleCode.getSaleName());
 					
-						if(req.getPassword().equals(getQueue.getOtp_password())){//(checkOtp.equals("Passwords Match")){//req.getPassword().equals(getQueue.getOtp_password())
+					System.out.println(""+getQueue.getDelivery_type()+",,,,"+saleCode.getSaleName()+",,,,"+req.getPassword()+",,,,"+getQueue.getOtp_password());
+					
+						if ((getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals(""))|| (req.getPassword().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)){//(checkOtp.equals("Passwords Match")){//req.getPassword().equals(getQueue.getOtp_password())
 							vQuery = "update Queue set status = 1,pickstatus=1,isload =1 ,confirmcode = '"+creatorCode+"',confirmdate = CURRENT_TIMESTAMP() where qid = "+req.getQueue_id()+" and docdate = curdate()";
 							System.out.println(vQuery);
 							isSuccess= excecute.execute(dbName,vQuery);
+							
+							if (getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals("")) {
+								vQuery = "update Queue set sendSaleCode = '"+req.getPassword()+"' where qid = "+req.getQueue_id()+" and docdate = curdate()";
+								System.out.println(vQuery);
+								isSuccess= excecute.execute(dbName,vQuery);
+							}
 							
 							vQueryStatus = "insert into QueuePickStatus(otp_code,qid,docno,pick_status,insertdatetime) values ('"+req.getPassword()+"',"+req.getQueue_id()+",'"+getQueue.getDocNo()+"',1,CURRENT_TIMESTAMP())";
 							System.out.println(vQueryStatus);
@@ -4425,6 +4683,8 @@ public class DriveThruController {
 										
 										//======================================================================
 												//==================================================================================
+										String linkFormBill = "";
+										linkFormBill = "http://drivethru.madebydome.com/resources/app/class/v1/print.php?invoice_no=" +bill.getBillHeader().getDocNo();
 										
 										
 										if (isSuccess ==true){

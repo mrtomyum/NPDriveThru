@@ -32,6 +32,7 @@ import bean.PK_Resp_NewOrderHeaderBean;
 import bean.PK_Resp_SearchCarBrandBean;
 import bean.UserSearchBean;
 import bean.request.CT_Req_LoginBean;
+import bean.request.CT_Req_LoginPassBean;
 import bean.request.CT_Req_SearchArBean;
 import bean.request.CT_Req_SearchBean;
 import bean.request.CT_Req_SearchInvoiceBean;
@@ -60,6 +61,7 @@ import bean.response.SO_Res_CarBrandBean;
 import bean.response.SO_Res_ChangeStatusBean;
 import bean.response.SO_Res_EditQueueBean;
 import bean.response.SO_Res_GenQueueRespBean;
+import bean.response.SO_Res_PickZoneBean;
 import bean.response.SO_Res_PickingManageProductBean;
 import bean.response.SO_Res_ProductQueueBean;
 import bean.response.SO_Res_QueueDailyBean;
@@ -88,7 +90,39 @@ public class DriveThru {
 		
 		company = ctl.searchCompanyZone("SmartConfig");
 		return company;
-	}	
+	}
+	
+	//==PickZone=============================================================================================
+	
+	@POST
+	@Path("/pick_zone/")//1.รายการ บริษัทและโซนการทำงาน เพื่อระบุคลังและชั้นเก็บ
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SO_Res_PickZoneBean searchPickZone(){
+		CT_Req_ServerDataBaseBean db = new CT_Req_ServerDataBaseBean();
+		DriveThruController ctl = new DriveThruController();
+		SO_Res_PickZoneBean pickzone = new SO_Res_PickZoneBean();
+		
+		db.setServerName("192.168.0.7");
+		db.setDatabaseName("bcnp");
+		
+		pickzone = ctl.searchItemPickZone(db);
+		return pickzone;
+	}
+	
+	//==LogIn Password====================================================================================
+	
+	@POST
+	@Path("/userlogin/")//2.login gen access token
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public LoginResponseBean userlogin(CT_Req_LoginPassBean req){
+		DriveThruController ctl = new DriveThruController();
+		LoginResponseBean login = new LoginResponseBean();
+		
+		login = ctl.userlogin("SmartConfig", req);
+		return login;
+	}
 	
 	//==LogIn=============================================================================================
 	

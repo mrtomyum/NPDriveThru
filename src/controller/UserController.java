@@ -92,7 +92,6 @@ public class UserController {
 		String branchCode="S01";
 		
 		try {
-			
 			branchCode = branch.getBranchID(dbName, login.getBranchId()).getCode();
 			// get connection
 			Statement stmt = ds.getStatement(dbName);

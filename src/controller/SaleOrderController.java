@@ -104,7 +104,7 @@ public class SaleOrderController {
 				evt.setApprove_code(rs.getString("approvecode"));
 				evt.setApprove_datetime(rs.getString("approvedatetime"));
 				evt.setDiscount_amount(rs.getDouble("discountamount"));
-				evt.setDeliver_type(rs.getInt("isconditionsend"));
+				evt.setDelivery_type(rs.getInt("isconditionsend"));
 				evt.setIs_confirm(rs.getInt("isconfirm"));
 				
 				List<SO_Res_ListOwnerPhoneBean>list_ownerphone = new ArrayList<SO_Res_ListOwnerPhoneBean>();				

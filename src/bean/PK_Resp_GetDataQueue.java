@@ -6,6 +6,7 @@ public class PK_Resp_GetDataQueue {
 	private int status;
 	private String carLicense;
 	private String saleCode;
+	private String saleName;
 	private String otp_password;
 	private int delivery_type;
 	private int billtype;
@@ -21,7 +22,7 @@ public class PK_Resp_GetDataQueue {
 
 
 	public PK_Resp_GetDataQueue(String docNo, int isCancel, int status,
-			String carLicense, String saleCode, String otp_password,
+			String carLicense, String saleCode, String saleName, String otp_password,
 			int delivery_type, int billtype, int doctype, int taxType,
 			int pickStatus, String saleOrder) {
 		super();
@@ -30,6 +31,7 @@ public class PK_Resp_GetDataQueue {
 		this.status = status;
 		this.carLicense = carLicense;
 		this.saleCode = saleCode;
+		this.saleName = saleName;
 		this.otp_password = otp_password;
 		this.delivery_type = delivery_type;
 		this.billtype = billtype;
@@ -87,6 +89,15 @@ public class PK_Resp_GetDataQueue {
 
 	public void setSaleCode(String saleCode) {
 		this.saleCode = saleCode;
+	}
+	
+	
+	public String getSaleName() {
+		return saleName;
+	}
+	
+	public void setSaleName(String saleName) {
+		this.saleName = saleName;
 	}
 
 

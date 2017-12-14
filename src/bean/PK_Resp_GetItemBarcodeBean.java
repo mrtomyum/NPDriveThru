@@ -13,6 +13,7 @@ public class PK_Resp_GetItemBarcodeBean {
 	private String secCode;
 	private String secName;
 	private double averageCost;
+	private String zoneId;
 	
 	public PK_Resp_GetItemBarcodeBean() {
 
@@ -21,7 +22,7 @@ public class PK_Resp_GetItemBarcodeBean {
 	public PK_Resp_GetItemBarcodeBean(String code, int rate1, String unitCode,
 			String itemName, String expertCode, String departmentCode,
 			String departmentName, String categoryCode, String categoryName,
-			String secCode, String secName, double averageCost) {
+			String secCode, String secName, double averageCost, String zoneId) {
 		super();
 		this.code = code;
 		this.rate1 = rate1;
@@ -35,6 +36,7 @@ public class PK_Resp_GetItemBarcodeBean {
 		this.secCode = secCode;
 		this.secName = secName;
 		this.averageCost = averageCost;
+		this.zoneId = zoneId;
 	}
 
 	public String getCode() {
@@ -133,7 +135,11 @@ public class PK_Resp_GetItemBarcodeBean {
 		this.averageCost = averageCost;
 	}
 
+	public String getZoneId() {
+		return zoneId;
+	}
 	
-	
-	
+	public void setZoneId(String zoneId) {
+		this.zoneId = zoneId;
+	}
 }

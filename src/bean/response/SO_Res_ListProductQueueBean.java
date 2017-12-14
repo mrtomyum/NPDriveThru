@@ -17,6 +17,7 @@ public class SO_Res_ListProductQueueBean {
 	 private String item_unit_code;
 	 private double request_qty;
 	 private double item_qty;
+	 private String pick_zone_id;
 	 private int line_number;
 	 
 	 
@@ -29,7 +30,7 @@ public class SO_Res_ListProductQueueBean {
 	public SO_Res_ListProductQueueBean(String item_barcode, String file_path, int is_cancel, int is_check,
 			String item_code, String item_name, String pickup_staff_name, String sale_code, double item_price,
 			double qty_after, double qty_before, double total_price_after, double total_price_before,
-			String item_unit_code, double request_qty, double item_qty, int line_number) {
+			String item_unit_code, double request_qty, double item_qty, String pick_zone_id, int line_number) {
 		super();
 		this.item_barcode = item_barcode;
 		this.file_path = file_path;
@@ -47,6 +48,7 @@ public class SO_Res_ListProductQueueBean {
 		this.item_unit_code = item_unit_code;
 		this.request_qty = request_qty;
 		this.item_qty = item_qty;
+		this.pick_zone_id = pick_zone_id;
 		this.line_number = line_number;
 	}
 
@@ -210,6 +212,14 @@ public class SO_Res_ListProductQueueBean {
 		this.item_qty = item_qty;
 	}
 
+	
+	public String getPick_zone_id() {
+		return pick_zone_id;
+	}
+	
+	public void setPick_zone_id(String pick_zone_id) {
+		this.pick_zone_id = pick_zone_id;
+	}
 
 	public int getLine_number() {
 		return line_number;

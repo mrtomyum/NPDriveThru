@@ -23,6 +23,7 @@ import bean.request.ReqItemSearchBean;
 import bean.response.ApiItemEditBean;
 import bean.response.ApiItemSearchBean;
 import bean.response.ResItemSearchBean;
+import bean.response.SO_Res_ListQueueStatusBean;
 import connect.NPSQLConn;
 import connect.QueueConnect;
 import connect.SQLConn;
@@ -252,7 +253,7 @@ public class ItemController {
 			
 		}
 	
-	public ApiItemEditBean itemEdit(String dbName,ReqItemEditBean reqItemEdit)
+	public ApiItemEditBean itemEdit1(String dbName,ReqItemEditBean reqItemEdit)
 	{
 		java.text.SimpleDateFormat dt= new java.text.SimpleDateFormat();
 		dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
@@ -401,8 +402,9 @@ public class ItemController {
 		
 		
 	}
-		
-	public ApiItemEditBean itemEdit2(String dbName,ReqItemEditBean reqItemEdit)
+	
+
+	public ApiItemEditBean itemEdit(String dbName,ReqItemEditBean reqItemEdit)
 	{
 		java.text.SimpleDateFormat dt= new java.text.SimpleDateFormat();
 		dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
@@ -412,16 +414,41 @@ public class ItemController {
 		String vQryItem;
 		boolean isSuccess;
 		String creatorCode="";
+//		String vCheckCountItem;
+//		String vQueryInsert;
+//		int vCountItem=0;
 		
 		server.setServerName("192.168.0.7");
 		server.setDbName("bcnp");
+		
 		
 		System.out.println("Insert Picture");
 			try {
 				
 				userCode = getData.searchUserAccessToken(reqItemEdit.getAccess_token());
 				creatorCode = userCode.getEmployeeCode();
-			    
+				
+//				try{
+//				Statement st_count = ds.getStatement(dbName);
+//				vCheckCountItem = "select count(code) as vCount from Item where code = '"+reqItemEdit.getBarCode()+"'"; 
+//				System.out.println("vCheckCountItem : "+vCheckCountItem);
+//				ResultSet rs_count = st_count.executeQuery(vCheckCountItem);
+//				while(rs_count.next()){
+//					vCountItem =rs_count.getInt("vCount");	
+//				}
+//				rs_count.close();
+//				st_count.close();
+//				} catch(Exception e){
+//					
+//				}finally{
+//					ds.close();
+//				}
+//				
+//				if (vCountItem == 0) {
+//					vQueryInsert = "insert into Item(code,name1,stkUnitcode) values('"+")";
+//				}
+				
+
 			   String fromPath="http://qserver.nopadol.com/drivethru/tmp/";
 			   String toPath = "//var//www//html//pictures//item//";
 			   String filePathTo ;
@@ -445,7 +472,7 @@ public class ItemController {
 						filePathUpload = toPath +fileName;
 						fileFromPath = fromPath+fileName;
 						
-			        	URL url = new URL(fileFromPath);
+		        	URL url = new URL(fileFromPath);
 			            image = ImageIO.read(url);
 			            ImageIO.write(image, "jpg",new File(filePathUpload));
 			            
@@ -462,7 +489,7 @@ public class ItemController {
 			        	vQryItem = "exec dbo.USP_NP_SaveItemPicture '"+reqItemEdit.getBarCode()+"','"+filePathTo+"','"+reqItemEdit.getShortCode()+"','"+reqItemEdit.getRemark()+"','"+creatorCode+"'";
 			        	System.out.println(vQryItem);
 			        	try{
-			        		isSuccess= sqlexec.executeSql("pos",vQryItem);
+			        		isSuccess= sqlexec.executeSqlPos("pos",vQryItem);
 			        	}catch(Exception e){
 			        		isSuccess=false;
 			        	}
@@ -471,7 +498,7 @@ public class ItemController {
 			        	vQryItem = "exec dbo.USP_NP_SaveItemPicture '"+reqItemEdit.getBarCode()+"','"+filePathTo+"','"+reqItemEdit.getShortCode()+"','"+reqItemEdit.getRemark()+"','"+creatorCode+"'";
 			        	System.out.println(vQryItem);
 			        	try{
-			        		isSuccess= sqlexec.executeSql("pos",vQryItem);
+			        		isSuccess= sqlexec.executeSqlPos("pos",vQryItem);
 			        	}catch(Exception e){
 			        		isSuccess=false;
 			        	}

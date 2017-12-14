@@ -4,6 +4,7 @@ public class SO_Res_ItemSaleOrderBean {
 	private String item_code;
 	private String item_name;
 	private double item_price;
+	private double qty;
 	private double remain_qty;
 	private String wh_code;
 	private String shelf_code;
@@ -16,22 +17,24 @@ public class SO_Res_ItemSaleOrderBean {
 	private String item_category_name;
 	private String sec_code;
 	private String sec_name;
+	private String zone_id;
+	private String pick_zone;
+	private String unit_code;
 	
 	public SO_Res_ItemSaleOrderBean() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public SO_Res_ItemSaleOrderBean(String item_code, String item_name,
-			double item_price, double remain_qty, String wh_code,
-			String shelf_code, int item_rate, double item_average,
-			String item_expert_code, String item_department_code,
-			String item_depart_name, String item_category_code,
-			String item_category_name, String sec_code, String sec_name) {
+	public SO_Res_ItemSaleOrderBean(String item_code, String item_name, double item_price, double qty, double remain_qty,
+			String wh_code, String shelf_code, int item_rate, double item_average, String item_expert_code,
+			String item_department_code, String item_depart_name, String item_category_code, String item_category_name,
+			String sec_code, String sec_name, String zone_id, String pick_zone, String unit_code) {
 		super();
 		this.item_code = item_code;
 		this.item_name = item_name;
 		this.item_price = item_price;
+		this.qty = qty;
 		this.remain_qty = remain_qty;
 		this.wh_code = wh_code;
 		this.shelf_code = shelf_code;
@@ -44,6 +47,9 @@ public class SO_Res_ItemSaleOrderBean {
 		this.item_category_name = item_category_name;
 		this.sec_code = sec_code;
 		this.sec_name = sec_name;
+		this.zone_id = zone_id;
+		this.pick_zone = pick_zone;
+		this.unit_code = unit_code;
 	}
 
 	public String getItem_code() {
@@ -68,6 +74,14 @@ public class SO_Res_ItemSaleOrderBean {
 
 	public void setItem_price(double item_price) {
 		this.item_price = item_price;
+	}
+	
+	public double  getQty() {
+		return qty;
+	}
+	
+	public void setQty(double qty) {
+		this.qty = qty;
 	}
 
 	public double getRemain_qty() {
@@ -166,5 +180,28 @@ public class SO_Res_ItemSaleOrderBean {
 		this.sec_name = sec_name;
 	}
 
+	public String getZone_id() {
+		return zone_id;
+	}
+
+	public void setZone_id(String zone_id) {
+		this.zone_id = zone_id;
+	}
+
+	public String getPick_zone() {
+		return pick_zone;
+	}
+
+	public void setPick_zone(String pick_zone) {
+		this.pick_zone = pick_zone;
+	}
+
+	public String getUnit_code() {
+		return unit_code;
+	}
+
+	public void setUnit_code(String unit_code) {
+		this.unit_code = unit_code;
+	}
 	
 }

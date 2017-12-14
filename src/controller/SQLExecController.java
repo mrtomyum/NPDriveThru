@@ -3,11 +3,13 @@ package controller;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import connect.S01PosConn;
 import connect.SQLConn;
 
 public class SQLExecController {
 	
 	private final SQLConn ds = SQLConn.INSTANCE;
+	private final S01PosConn posDs = S01PosConn.INSTANCE;
 	private boolean isSuccess;
 	public boolean isSuccess() {
 		return isSuccess;
@@ -20,6 +22,31 @@ public class SQLExecController {
 		
 		try {
 			Statement stmt = ds.getSqlStatement(dbName);
+	
+			stmt.execute(sql);
+			if (stmt != null) {
+				stmt.close();
+			}
+			isSuccess=true;
+			
+			stmt.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			isSuccess=false;
+		} finally {
+			
+			ds.close();
+			
+		}
+		
+		return isSuccess;
+	}
+	
+	public boolean executeSqlPos(String dbName,String sql) {
+		
+		try {
+			Statement stmt = posDs.getSqlStatement(dbName);
 	
 			stmt.execute(sql);
 			if (stmt != null) {

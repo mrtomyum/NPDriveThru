@@ -20,6 +20,7 @@ public class SO_Res_ListSaleOrderItemBean {
 	private double net_amount;
 
 	private int packing_rate1;
+	private String pick_zone_id;
 	private int line_number;
 	
 	
@@ -35,7 +36,7 @@ public class SO_Res_ListSaleOrderItemBean {
 			String wh_code, String shelf_code, double item_qty,
 			double request_qty, double qty_before, double item_price,
 			double discount_amount, double item_amount, double net_amount,
-			int packing_rate1, int line_number) {
+			int packing_rate1, String pick_zone_id, int line_number) {
 		super();
 		this.item_code = item_code;
 		this.item_barcode = item_barcode;
@@ -55,6 +56,7 @@ public class SO_Res_ListSaleOrderItemBean {
 		this.item_amount = item_amount;
 		this.net_amount = net_amount;
 		this.packing_rate1 = packing_rate1;
+		this.pick_zone_id = pick_zone_id;
 		this.line_number = line_number;
 	}
 
@@ -237,7 +239,14 @@ public class SO_Res_ListSaleOrderItemBean {
 	public void setPacking_rate1(int packing_rate1) {
 		this.packing_rate1 = packing_rate1;
 	}
+	
+	public String getPick_zone_id() {
+		return pick_zone_id;
+	}
 
+	public void setPick_zone_id(String pick_zone_id) {
+		this.pick_zone_id = pick_zone_id;
+	}
 
 	public int getLine_number() {
 		return line_number;

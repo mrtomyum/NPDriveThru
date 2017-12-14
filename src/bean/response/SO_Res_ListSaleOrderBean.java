@@ -17,7 +17,7 @@ public class SO_Res_ListSaleOrderBean {
 	private double before_tax_amount;
 	private double tax_amount;
 	private double total_amount;
-	private int deliver_type;
+	private int delivery_type;
 	private int bill_type;
 	private int so_status;
 	private int holding_status;
@@ -42,7 +42,7 @@ public class SO_Res_ListSaleOrderBean {
 			String sale_code, String sale_name, String pickup_datetime,
 			double sum_Of_item_amount, double discount_amount,
 			double before_tax_amount, double tax_amount, double total_amount,
-			int deliver_type, int bill_type, int so_status, int holding_status,
+			int delivery_type, int bill_type, int so_status, int holding_status,
 			int is_confirm, String approve_code, String approve_datetime,
 			int is_load, int tax_type, List owner_phone, List receiver_phone,
 			List<SO_Res_ListSaleOrderItemBean> list_item) {
@@ -60,7 +60,7 @@ public class SO_Res_ListSaleOrderBean {
 		this.before_tax_amount = before_tax_amount;
 		this.tax_amount = tax_amount;
 		this.total_amount = total_amount;
-		this.deliver_type = deliver_type;
+		this.delivery_type = delivery_type;
 		this.bill_type = bill_type;
 		this.so_status = so_status;
 		this.holding_status = holding_status;
@@ -205,13 +205,13 @@ public class SO_Res_ListSaleOrderBean {
 	}
 
 
-	public int getDeliver_type() {
-		return deliver_type;
+	public int getDelivery_type() {
+		return delivery_type;
 	}
 
 
-	public void setDeliver_type(int deliver_type) {
-		this.deliver_type = deliver_type;
+	public void setDelivery_type(int delivery_type) {
+		this.delivery_type = delivery_type;
 	}
 
 
