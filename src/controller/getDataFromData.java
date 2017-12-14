@@ -32,6 +32,9 @@ import bean.response.CT_Resp_ResponseBean;
 import bean.response.SO_Res_CheckDataSOBean;
 import bean.response.SO_Res_CheckQueueItemBean;
 import bean.response.SO_Res_ItemSaleOrderBean;
+import bean.response.SO_Res_ListProductQueueBean;
+import bean.response.SO_Res_ListSaleOrderItemBean;
+import bean.response.SO_Res_QueuePickupBean;
 import connect.NPSQLConn;
 import connect.QueueConnect;
 import connect.S01PosConn;
@@ -62,6 +65,9 @@ public class getDataFromData {
     private final S01PosConn posDs;
     private SimpleDateFormat dtDoc;
     private SimpleDateFormat dt;
+    
+    private final SQLConn conn = SQLConn.INSTANCE;
+    
     DateFormat dateFormat;
     PK_Resp_GetItemBarcodeBean resItem;
     PK_Resp_GetDataQueue resQue;
@@ -87,6 +93,8 @@ public class getDataFromData {
     CT_Resp_ResponseBean response;
     private boolean isSuccess;
     ExcecuteController excecute;
+    
+    getDataFromData data = new getDataFromData();
     
     
     public getDataFromData() {
@@ -2109,5 +2117,168 @@ public class getDataFromData {
         String afterhex = bCryptPassword.toSHA1(myPassword.getBytes());
         String encodedBytes = encoder.encodeBuffer(afterhex.getBytes());
         return encodedBytes;
+    }
+    
+    public void UpdateSaleOrderData(String dbName,DT_User_LoginBranchBean db,SO_Req_EditSaleOrderBean req) {
+    	SO_Res_ItemSaleOrderBean item_saleorder = new SO_Res_ItemSaleOrderBean();
+    	double itemPrice;
+    	int vCheckExistItem;
+    	double itemAmount;
+    	double 
+    	
+    	String saleCode;
+    	String saleName;
+    	
+    	try {
+    		
+    		PK_Resp_GetDataQueue QueueData = new PK_Resp_GetDataQueue();
+    		
+    		QueueData = searchQueue(req.getQueue_id());
+    		
+    		saleCode = QueueData.getSaleCode();
+    		saleName = QueueData.getSaleName();
+    		
+			Statement st_sub = conn.getSqlStatement(db.getServerName(), db.getDbName());
+			vQuerySub = "exec dbo.USP_API_SOItemAddBillDriveThru '"+QueueData.getSaleOrder()+"'";
+			System.out.println(vQuerySub);
+			ResultSet rs_sub = st_sub.executeQuery(vQuerySub);
+			
+			while(rs_sub.next()){
+				System.out.println("count_row"+rs_sub.getString("barcode"));
+				evt_item = new SO_Res_ListSaleOrderItemBean();
+				evt_item.setItem_code(rs_sub.getString("itemcode"));
+				evt_item.setItem_name(rs_sub.getString("itemname"));
+				evt_item.setItem_file_path(rs_sub.getString("picfilename1"));
+				evt_item.setWh_code(rs_sub.getString("whcode"));
+				evt_item.setShelf_code(rs_sub.getString("shelfcode"));
+				evt_item.setItem_qty(rs_sub.getDouble("remainqty"));
+				evt_item.setItem_price(rs_sub.getDouble("price"));
+				evt_item.setItem_unit_code(rs_sub.getString("unitcode"));
+				evt_item.setItem_amount(rs_sub.getDouble("amount"));
+				evt_item.setDiscount_amount(rs_sub.getDouble("discountamount"));
+				evt_item.setNet_amount(rs_sub.getDouble("netamount"));
+				evt_item.setRequest_qty(rs_sub.getDouble("remainqty"));
+				evt_item.setPacking_rate1(rs_sub.getInt("packingrate1"));
+				evt_item.setLine_number(rs_sub.getInt("linenumber"));
+				evt_item.setItem_category(rs_sub.getString("categorycode"));
+				evt_item.setItem_remark(rs_sub.getString("remark"));
+				evt_item.setItem_short_code(rs_sub.getString("shortcode"));
+				evt_item.setItem_barcode(rs_sub.getString("barcode"));
+				evt_item.setPick_zone_id(rs_sub.getString("zoneid"));
+				
+				
+				System.out.println("Item1 = "+rs_sub.getString("itemcode"));
+
+				item_saleorder = data.checkItemSaleOrderData(db, QueueData.getSaleOrder(), rs_sub.getString("itemcode"), rs_sub.getString("unitcode"), rs_sub.getInt("linenumber"));
+
+				if (rs_sub.getString("itemcode")!=null && rs_sub.getString("itemcode")!=""){
+					System.out.println("Item2 = "+rs_sub.getString("itemcode"));	
+					if (isSuccess==true){
+						System.out.println("Item3 = "+rs_sub.getString("itemcode"));
+						if(QueueData.getStatus() < 2) {
+							vCheckExistItem = 0;
+
+							itemPrice = rs_sub.getDouble("price");
+
+							if (saleCode == "" || saleCode == null) {
+								saleCode = userCode.getEmployeeCode();//lastSale.getSaleCode();
+								saleName = userCode.getEmployeeName();//lastSale.getSaleName();
+
+								System.out.println("No Have SaleCode");
+
+							}
+
+							itemAmount = 0;
+
+							System.out.println("SaleName : "+saleCode+"/"+saleName);
+
+							if (rs_sub.getString("itemcode")!=null && rs_sub.getString("itemcode")!=""){
+								if (vCheckExistItem==0 && rs_sub.getDouble("remainqty")>0){
+
+									vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,reqQty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,whcode,shelfcode,zoneid,pickzone) "+ "values("
+											+req.getQueue_id()+",'"+QueueData.getSaleOrder()+"',CURDATE(),'"+ rs_sub.getString("itemcode")+"','"+rs_sub.getString("itemname")+"','"+rs_sub.getString("unitcode")+"','"+rs_sub.getString("barcode")+"',"+ rs_sub.getDouble("remainqty")+","+rs_sub.getDouble("remainqty")+",0,0,0,"+itemPrice+","+itemAmount+","+item_saleorder.getItem_rate()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,0,"+req.getItem().get(i).getLine_number()+",'"+saleCode+"','"+saleName+"','"+item_saleorder.getItem_expert_code()+"','"+item_saleorder.getItem_department_code()+"','"+item_saleorder.getItem_depart_name()+"','"+item_saleorder.getItem_category_code()+"','"+item_saleorder.getItem_category_name()+"','"+item_saleorder.getSec_code()+"','"+item_saleorder.getSec_name()+"',"+item_saleorder.getItem_average()+",'"+item_saleorder.getWh_code()+"','"+item_saleorder.getShelf_code()+"','"+item_saleorder.getZone_id()+"','"+item_saleorder.getPick_zone()+"' )";
+									System.out.println("QuerySub :"+vQuery);
+									isSuccess= excecute.execute(dbName,vQuery);
+
+									vQueryLog = "exec dbo.USP_NP_InsertPickItemDriveThru '"+req.getDoc_no()+"','"+otp_password+"','"+req.getPlate_number()+"','"+req.getItem().get(i).getItem_code()+"',"+req.getItem().get(i).getRequest_qty()+",'"+req.getItem().get(i).getItem_unit_code()+"','"+item_saleorder.getWh_code()+"','"+item_saleorder.getShelf_code()+"','','',0,"+req.getItem().get(i).getLine_number();
+									System.out.println("vQueryLog = "+vQueryLog);
+
+									isSuccess= npExec.executeSqlBranch(db,vQueryLog);
+
+								}else{
+									vQuery = "update QItem set qty ="+req.getItem().get(i).getRequest_qty()+",reqQty="+req.getItem().get(i).getRequest_qty()+",price ="+itemPrice +",itemAmount="+itemAmount+",isCancel=0,salecode='"+saleCode+"',salename='"+saleName+"' where qId = "+qId+" and docNo ='"+vGenNewDocNo+"' and itemCode='"+req.getItem().get(i).getItem_code()+"' and barCode ='"+req.getItem().get(i).getItem_barcode()+"' and unitCode ='"+req.getItem().get(i).getItem_unit_code()+"' and lineNumber ="+req.getItem().get(i).getLine_number();
+									System.out.println("QuerySub :"+vQuery);
+									isSuccess= excecute.execute(dbName,vQuery);
+								}
+
+								vQuerySub = "update  Queue set numberofitem = (select count(itemCode) as countItem from QItem where docNo = '"+vGenNewDocNo+"') where docNo ='"+vGenNewDocNo+"'";
+								System.out.println("vQuerySub = "+vQuerySub);
+
+								isSuccess= excecute.execute(dbName,vQuerySub);
+
+								itemList.setBarCode(req.getItem().get(i).getItem_barcode());
+								itemList.setFilePath(getData.getItemFilePath(req.getItem().get(i).getItem_barcode()));
+								itemList.setItemCategory(item_saleorder.getItem_category_code());
+								itemList.setItemCode(item_saleorder.getItem_code());
+								itemList.setItemName(item_saleorder.getItem_name());
+								itemList.setItemPrice(itemPrice);
+								itemList.setRemark("");
+								itemList.setShortCode(req.getItem().get(i).getItem_barcode());
+								itemList.setUnitCode(req.getItem().get(i).getItem_unit_code());
+
+								resp_item.setItem(itemList);
+								//resp_item
+
+								queue.setSuccess(true);
+								queue.setError(false);
+								queue.setMessage("");
+
+
+							}else{
+
+								isSuccess=false;
+								queue.setSuccess(false);
+								queue.setError(true);
+								queue.setMessage("No have barcode");
+
+								resp_item.setItem(itemList);
+							}
+						}else{
+							isSuccess=false;
+							queue.setSuccess(false);
+							queue.setError(true);
+							queue.setMessage("Queue status is used");
+
+							resp_item.setItem(itemList);
+						}
+
+					}else{
+						isSuccess=false;
+						queue.setSuccess(false);
+						queue.setError(true);
+						queue.setMessage("Queue is cancel");
+
+						resp_item.setItem(itemList);
+					}
+				}else{
+					//==============================
+					isSuccess=false;
+					queue.setSuccess(false);
+					queue.setError(true);
+					queue.setMessage("Barcode is null");
+
+					resp_item.setItem(itemList);
+				}
+				
+			}
+			
+			rs_sub.close();
+			st_sub.close();
+
+    	}catch(SQLException e) {
+			System.out.println(e.getMessage());	
+    	}finally {
+    		
+    	}
     }
 }
