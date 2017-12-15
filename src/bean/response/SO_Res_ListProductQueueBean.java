@@ -12,6 +12,7 @@ public class SO_Res_ListProductQueueBean {
 	 private double item_price;
 	 private double qty_after;
 	 private double qty_before;
+	 private double qty_load;
 	 private double total_price_after;
 	 private double total_price_before;
 	 private String item_unit_code;
@@ -29,7 +30,7 @@ public class SO_Res_ListProductQueueBean {
 
 	public SO_Res_ListProductQueueBean(String item_barcode, String file_path, int is_cancel, int is_check,
 			String item_code, String item_name, String pickup_staff_name, String sale_code, double item_price,
-			double qty_after, double qty_before, double total_price_after, double total_price_before,
+			double qty_after, double qty_before, double qty_load, double total_price_after, double total_price_before,
 			String item_unit_code, double request_qty, double item_qty, String pick_zone_id, int line_number) {
 		super();
 		this.item_barcode = item_barcode;
@@ -43,6 +44,7 @@ public class SO_Res_ListProductQueueBean {
 		this.item_price = item_price;
 		this.qty_after = qty_after;
 		this.qty_before = qty_before;
+		this.qty_load = qty_load;
 		this.total_price_after = total_price_after;
 		this.total_price_before = total_price_before;
 		this.item_unit_code = item_unit_code;
@@ -160,6 +162,10 @@ public class SO_Res_ListProductQueueBean {
 
 	public void setQty_before(double qty_before) {
 		this.qty_before = qty_before;
+	}
+	
+	public double getQty_load() {
+		return qty_load;
 	}
 
 
