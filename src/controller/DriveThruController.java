@@ -1912,7 +1912,7 @@ public class DriveThruController {
 		//Date dateNow = new Date();
 		int vCountToken = 0 ;
 
-		System.out.println("MangeItem");
+		System.out.println("LoadItem");
 
 		SO_Res_CheckQueueItemBean itemExist = new SO_Res_CheckQueueItemBean();
 
