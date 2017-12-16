@@ -1096,6 +1096,7 @@ public class DriveThruController {
 								evt_item.setQty_after(rs_item.getDouble("checkoutqty"));
 								evt_item.setQty_before(rs_item.getDouble("pickqty"));
 								evt_item.setRequest_qty(rs_item.getDouble("reqqty"));
+								evt_item.setQty_load(rs_item.getDouble("loadqty"));
 								evt_item.setTotal_price_after(rs_item.getDouble("checkoutamount"));
 								evt_item.setTotal_price_before(rs_item.getDouble("itemamount"));
 								evt_item.setItem_unit_code(rs_item.getString("unitcode"));
@@ -1255,6 +1256,8 @@ public class DriveThruController {
 		return queue;
 	}
 	
+	
+	
 	public SO_Res_SearchQueueDataBean SearchQueueList(String dbName,SO_Req_SearchQueueDataBean req){
 		String vQuery;
 		DT_User_LoginBranchBean db = new DT_User_LoginBranchBean();
@@ -1337,6 +1340,7 @@ public class DriveThruController {
 					evt_item.setQty_after(rs_item.getDouble("checkoutqty"));
 					evt_item.setQty_before(rs_item.getDouble("pickqty"));
 					evt_item.setRequest_qty(rs_item.getDouble("reqqty"));
+					evt_item.setQty_load(rs_item.getDouble("loadqty"));
 					evt_item.setTotal_price_after(rs_item.getDouble("checkoutamount"));
 					evt_item.setTotal_price_before(rs_item.getDouble("itemamount"));
 					evt_item.setItem_unit_code(rs_item.getString("unitcode"));
@@ -1566,6 +1570,7 @@ public class DriveThruController {
 				evt.setQty_after(rs_Sub.getDouble("checkoutqty"));
 				evt.setQty_before(rs_Sub.getDouble("pickqty"));
 				evt.setRequest_qty(rs_Sub.getDouble("reqqty"));
+				evt.setQty_load(rs_Sub.getDouble("loadqty"));
 				evt.setTotal_price_after(rs_Sub.getDouble("checkoutamount"));
 				evt.setTotal_price_before(rs_Sub.getDouble("itemamount"));
 				evt.setItem_unit_code(rs_Sub.getString("unitcode"));
@@ -1798,6 +1803,253 @@ public class DriveThruController {
 													evt.setQty_after(rs.getDouble("checkoutqty"));
 													evt.setQty_before(rs.getDouble("pickqty"));
 													evt.setRequest_qty(rs.getDouble("reqqty"));
+													evt.setQty_load(rs.getDouble("loadqty"));
+													evt.setTotal_price_after(rs.getDouble("checkoutamount"));
+													evt.setTotal_price_before(rs.getDouble("itemamount"));
+													evt.setItem_unit_code(rs.getString("unitcode"));
+													evt.setLine_number(rs.getInt("linenumber"));
+													evt.setItem_qty(rs.getDouble("qty"));
+													
+													listproduct.add(evt);
+
+												}
+												
+												rs.close();
+												st.close();
+												
+												queuedata.setItem(listproduct);
+												
+
+											resItem.setItem(listproduct);
+											resItem.setSuccess(true);
+											resItem.setError(false);
+											resItem.setMessage("");
+
+										}catch(Exception e){
+											resItem.setItem(listproduct);
+											resItem.setSuccess(false);
+											resItem.setError(true);
+											resItem.setMessage(e.getMessage());
+										}finally{
+											ds.close();
+										}
+									}
+								}else{
+									resItem.setItem(listproduct);
+									resItem.setSuccess(false);
+									resItem.setError(true);
+									resItem.setMessage("Pick Qty more than request qty");
+								}
+							}else{
+								resItem.setItem(listproduct);
+								resItem.setSuccess(false);
+								resItem.setError(true);
+								resItem.setMessage("No have barcode");
+							}
+						}else{
+							resItem.setItem(listproduct);
+							resItem.setSuccess(false);
+							resItem.setError(true);
+							resItem.setMessage("Queue status is used");
+
+						}
+
+					}else{
+						resItem.setItem(listproduct);
+						resItem.setSuccess(false);
+						resItem.setError(true);
+						resItem.setMessage("Queue is not manage item becuase queue pick status not ready");
+
+					}
+				}else{
+					resItem.setItem(listproduct);
+					resItem.setSuccess(false);
+					resItem.setError(true);
+					resItem.setMessage("Queue is cancel");
+
+				}
+			}else{
+				//==============================
+				resItem.setItem(listproduct);
+				resItem.setSuccess(false);
+				resItem.setError(true);
+				resItem.setMessage("Barcode is null");
+			}
+		}else{
+			//===================================
+			resItem.setItem(listproduct);
+			resItem.setSuccess(false);
+			resItem.setError(true);
+			resItem.setMessage("qID not generate");
+		}
+
+		return resItem;
+
+	}
+	
+	
+	public SO_Res_PickingManageProductBean LoadManageProduct(String dbName,SO_Req_PickingManageProductBean reqItem){
+		getDataFromData getData = new getDataFromData();
+		PK_Resp_GetItemBarcodeBean getBarData = new PK_Resp_GetItemBarcodeBean();
+		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
+		PK_Resp_SaleCodeDetails lastSale = new PK_Resp_SaleCodeDetails();
+		
+		LoginBean userCode = new LoginBean();
+		String vQuery="";
+		int vCheckExistItem=0;
+		double itemPrice=0.0;
+		double itemAmount=0.0;
+		String vQuerySub;
+		String saleCode="";
+		String saleName="";
+		String creatorCode="";
+		double vQty=0.0;
+		String pick_zone_id;
+
+
+		dtDoc.applyPattern("yyyy-MM-dd");
+		dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
+		//Date dateNow = new Date();
+		int vCountToken = 0 ;
+
+		System.out.println("MangeItem");
+
+		SO_Res_CheckQueueItemBean itemExist = new SO_Res_CheckQueueItemBean();
+
+		if (reqItem.getQueue_id()!=0){
+			if (reqItem.getItem_barcode()!=null && reqItem.getItem_barcode()!=""){
+				System.out.println("1");
+				getQueue = getData.searchQueue(reqItem.getQueue_id());
+
+				if (getQueue.getIsCancel()==0){
+
+					if (getQueue.getPickStatus()!=2){
+
+						System.out.println("Error : "+getQueue.getStatus());
+
+						if(getQueue.getStatus() < 2 && getQueue.getPickStatus()!= 2) {
+							getBarData = getData.searchItemCode(reqItem.getItem_barcode());
+							userCode = getData.searchUserAccessToken(reqItem.getAccess_token());
+							itemExist = getData.checkItemExistPickupProduct(reqItem);
+							if(itemExist.getItem_exist()==0 && itemExist.getItem_source() == 0){
+								itemPrice = getData.searchItemPrice(getBarData.getCode(),reqItem.getItem_barcode(), getBarData.getUnitCode());
+							}else{
+								itemPrice = itemExist.getItem_price();
+							}
+
+							creatorCode = userCode.getEmployeeCode();
+
+							vCheckExistItem =  itemExist.getItem_exist();
+
+							if (reqItem.getSale_code()==""  || reqItem.getSale_code() == null) {
+								//lastSale = getData.searchTopSaleCode(reqItem.getQueue_id());
+								saleCode = userCode.getEmployeeCode();//lastSale.getSaleCode();
+								saleName = userCode.getEmployeeName();//lastSale.getSaleName();
+
+								System.out.println("No Have SaleCode");
+
+							}else{
+								sale = getData.searchSaleCode(reqItem.getSale_code());
+								System.out.println("Have SaleCode");
+								if (sale.getIsExist()==1){
+									saleCode = sale.getSaleCode();
+									saleName = sale.getSaleName();
+								}else{
+									saleCode = "N/A";
+									saleName = "-";
+								}
+
+							}
+
+							itemAmount = itemPrice*reqItem.getQty_before();
+
+							System.out.println("SaleName : "+saleCode+"/"+saleName);
+
+							//System.out.println("ItemAmount : "+itemAmount);
+							System.out.println("Source="+itemExist.getItem_source());
+							System.out.println("BillType="+itemExist.getBill_type());
+							System.out.println("getQty_before="+itemExist.getQty_before());
+
+							//System.out.println("Item_Source1 = "+itemExist.getItem_source());
+							if (getBarData.getCode()!=null && getBarData.getCode()!=""){
+								if((reqItem.getQty_before()<=itemExist.getRequest_qty() && itemExist.getItem_source() == 1 && itemExist.getBill_type()==1) || (itemExist.getItem_source()==0)||(itemExist.getItem_source() == 1 && itemExist.getBill_type()==0)){
+
+									System.out.println("Item_Source2 = "+itemExist.getItem_source());
+									
+									if (itemExist.getItem_source()==0){
+										vQty = itemExist.getQty_before();
+									}else{
+										vQty = itemExist.getSale_qty();
+									}
+									
+									if (vCheckExistItem==0){
+										if ((itemExist.getItem_source()==0)||(itemExist.getItem_source()==1 && itemExist.getBill_type()==0)){
+											vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,zoneId) "+ "values("
+													+reqItem.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getItem_barcode()+"',"+ vQty+","+reqItem.getQty_before()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIs_cancel()+","+reqItem.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+",'"+getBarData.getZoneId()+"' )";
+											//+reqItem.getqId()+",'"+getQueue.getDocNo()+"','"+dateFormat.format(dateNow)+"','"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getBarCode()+"',"+ reqItem.getQtyBefore()+","+reqItem.getQtyBefore()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIsCancel()+",0,'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+" )";
+											isSuccess= excecute.execute(dbName,vQuery);
+
+											vQuerySub = "update  Queue set numberofitem = (select count(itemCode) as countItem from QItem where docNo = '"+getQueue.getDocNo()+"') where docNo ='"+getQueue.getDocNo()+"'";
+
+											System.out.println("vQuerySub = "+vQuerySub);
+
+											isSuccess= excecute.execute(dbName,vQuerySub);
+
+											resItem.setSuccess(true);
+											resItem.setError(false);
+											resItem.setMessage("");
+
+										}else{
+											System.out.println("Source = "+itemExist.getItem_source());
+											resItem.setItem(listproduct);
+											resItem.setSuccess(false);
+											resItem.setError(true);
+											resItem.setMessage("Sale Order can not add new item");
+										}
+									}else{
+										if((itemExist.getItem_source()==0 && reqItem.getIs_cancel()==0 && reqItem.getQty_before()!= 0)||(itemExist.getItem_source()==1 && reqItem.getQty_before()!=0 && itemExist.getBill_type() == 0) || (itemExist.getItem_source()==1 && reqItem.getQty_before()<= itemExist.getSale_qty() && itemExist.getBill_type() == 1)){
+											vQuery = "update QItem set qty ="+vQty+",pickQty="+reqItem.getQty_before()+",price ="+itemPrice+",itemAmount="+itemAmount+",isCancel=0,salecode='"+saleCode+"',salename='"+saleName+"',pickerCode ='"+userCode.getEmployeeCode()+"' where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getLine_number();
+										}else{
+											vQuery = "update QItem set qty=0,pickQty = 0,itemAmount=0,isCancel=1,cancelCode='"+creatorCode+"',cancelDate = CURRENT_TIMESTAMP where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber = "+reqItem.getLine_number();
+										}
+
+										isSuccess= excecute.execute(dbName,vQuery);
+
+										resItem.setSuccess(true);
+										resItem.setError(false);
+										resItem.setMessage("");
+
+									}
+									System.out.println(vQuery);
+
+									if(resItem.isSuccess()==true){
+										try{
+
+												Statement st = ds.getStatement(dbName);
+												//vQuery = "call USP_DT_SearchQueueProduct ("+req.getQueue_id()+")";
+												vQuery = "call USP_DT_QueueDataItem ("+reqItem.getQueue_id()+",'"+getBarData.getCode()+"')";
+												ResultSet rs = st.executeQuery(vQuery);
+												System.out.println(vQuery);
+												
+												listproduct.clear();
+												SO_Res_ListProductQueueBean evt;
+												System.out.println("Count"+rs.getRow());
+												while(rs.next()){
+													
+													evt = new SO_Res_ListProductQueueBean();
+													evt.setFile_path(rs.getString("filepath"));
+													evt.setIs_cancel(rs.getInt("itemcancel"));
+													evt.setIs_check(rs.getInt("ischeckout"));
+													evt.setItem_barcode(rs.getString("barcode"));
+													evt.setItem_code(rs.getString("itemcode"));
+													evt.setItem_name(rs.getString("itemname"));
+													evt.setPickup_staff_name(rs.getString("pickername"));
+													evt.setSale_code(rs.getString("salecode"));
+													evt.setItem_price(rs.getDouble("price"));
+													evt.setQty_after(rs.getDouble("checkoutqty"));
+													evt.setQty_before(rs.getDouble("pickqty"));
+													evt.setRequest_qty(rs.getDouble("reqqty"));
+													evt.setQty_load(rs.getDouble("loadqty"));
 													evt.setTotal_price_after(rs.getDouble("checkoutamount"));
 													evt.setTotal_price_before(rs.getDouble("itemamount"));
 													evt.setItem_unit_code(rs.getString("unitcode"));
@@ -2043,6 +2295,7 @@ public class DriveThruController {
 											evt.setQty_after(rs.getDouble("checkoutqty"));
 											evt.setQty_before(rs.getDouble("pickqty"));
 											evt.setRequest_qty(rs.getDouble("reqqty"));
+											evt.setQty_load(rs.getDouble("loadqty"));
 											evt.setTotal_price_after(rs.getDouble("checkoutamount"));
 											evt.setTotal_price_before(rs.getDouble("itemamount"));
 											evt.setItem_unit_code(rs.getString("unitcode"));
@@ -2235,6 +2488,7 @@ public class DriveThruController {
 								evt.setQty_after(rs.getDouble("checkoutqty"));
 								evt.setQty_before(rs.getDouble("pickqty"));
 								evt.setRequest_qty(rs.getDouble("reqqty"));
+								evt.setQty_load(rs.getDouble("loadqty"));
 								evt.setTotal_price_after(rs.getDouble("checkoutamount"));
 								evt.setTotal_price_before(rs.getDouble("itemamount"));
 								evt.setItem_unit_code(rs.getString("unitcode"));
@@ -2552,6 +2806,7 @@ public class DriveThruController {
 														evt.setQty_after(rs.getDouble("checkoutqty"));
 														evt.setQty_before(rs.getDouble("pickqty"));
 														evt.setRequest_qty(rs.getDouble("reqqty"));
+														evt.setQty_load(rs.getDouble("loadqty"));
 														evt.setTotal_price_after(rs.getDouble("checkoutamount"));
 														evt.setTotal_price_before(rs.getDouble("itemamount"));
 														evt.setItem_unit_code(rs.getString("unitcode"));
@@ -3105,6 +3360,7 @@ public class DriveThruController {
 						evt.setQty_after(rs.getDouble("checkoutqty"));
 						evt.setQty_before(rs.getDouble("pickqty"));
 						evt.setRequest_qty(rs.getDouble("reqqty"));
+						 
 						evt.setTotal_price_after(rs.getDouble("checkoutamount"));
 						evt.setTotal_price_before(rs.getDouble("itemamount"));
 						evt.setItem_unit_code(rs.getString("unitcode"));

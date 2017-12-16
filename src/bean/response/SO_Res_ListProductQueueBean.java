@@ -168,6 +168,9 @@ public class SO_Res_ListProductQueueBean {
 		return qty_load;
 	}
 
+	public void setQty_load(double qty_load) {
+		this.qty_load = qty_load;
+	}
 
 	public double getTotal_price_after() {
 		return total_price_after;
