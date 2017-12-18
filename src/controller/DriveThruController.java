@@ -1923,11 +1923,10 @@ public class DriveThruController {
 
 				if (getQueue.getIsCancel()==0){
 
-					if (getQueue.getPickStatus()!=2){
+					if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1){
 
 						System.out.println("Error : "+getQueue.getStatus());
 
-						if(getQueue.getStatus() < 2 && getQueue.getPickStatus()!= 2) {
 							getBarData = getData.searchItemCode(reqItem.getItem_barcode());
 							userCode = getData.searchUserAccessToken(reqItem.getAccess_token());
 							itemExist = getData.checkItemExistPickupProduct(reqItem);
@@ -1940,26 +1939,6 @@ public class DriveThruController {
 							creatorCode = userCode.getEmployeeCode();
 
 							vCheckExistItem =  itemExist.getItem_exist();
-
-							if (reqItem.getSale_code()==""  || reqItem.getSale_code() == null) {
-								//lastSale = getData.searchTopSaleCode(reqItem.getQueue_id());
-								saleCode = userCode.getEmployeeCode();//lastSale.getSaleCode();
-								saleName = userCode.getEmployeeName();//lastSale.getSaleName();
-
-								System.out.println("No Have SaleCode");
-
-							}else{
-								sale = getData.searchSaleCode(reqItem.getSale_code());
-								System.out.println("Have SaleCode");
-								if (sale.getIsExist()==1){
-									saleCode = sale.getSaleCode();
-									saleName = sale.getSaleName();
-								}else{
-									saleCode = "N/A";
-									saleName = "-";
-								}
-
-							}
 
 							itemAmount = itemPrice*reqItem.getQty_before();
 
@@ -2092,13 +2071,6 @@ public class DriveThruController {
 								resItem.setError(true);
 								resItem.setMessage("No have barcode");
 							}
-						}else{
-							resItem.setItem(listproduct);
-							resItem.setSuccess(false);
-							resItem.setError(true);
-							resItem.setMessage("Queue status is used");
-
-						}
 
 					}else{
 						resItem.setItem(listproduct);
