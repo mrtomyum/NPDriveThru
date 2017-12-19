@@ -60,6 +60,7 @@ import bean.request.SO_Req_CheckOutManageProductBean;
 import bean.request.SO_Req_EditQueueBean;
 import bean.request.SO_Req_EditSaleOrderBean;
 import bean.request.SO_Req_GenOTPSaleOrderBean;
+import bean.request.SO_Req_LoadManageProductBean;
 import bean.request.SO_Req_PickingManageProductBean;
 import bean.request.SO_Req_QueueId;
 import bean.request.SO_Req_QueueProductBean;
@@ -1888,7 +1889,7 @@ public class DriveThruController {
 	}
 	
 	
-	public SO_Res_PickingManageProductBean LoadManageProduct(String dbName,SO_Req_PickingManageProductBean reqItem){
+	public SO_Res_PickingManageProductBean LoadManageProduct(String dbName,SO_Req_LoadManageProductBean reqItem){
 		getDataFromData getData = new getDataFromData();
 		PK_Resp_GetItemBarcodeBean getBarData = new PK_Resp_GetItemBarcodeBean();
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
@@ -1927,85 +1928,15 @@ public class DriveThruController {
 
 						System.out.println("Error : "+getQueue.getStatus());
 
-							getBarData = getData.searchItemCode(reqItem.getItem_barcode());
-							userCode = getData.searchUserAccessToken(reqItem.getAccess_token());
-							itemExist = getData.checkItemExistPickupProduct(reqItem);
-							if(itemExist.getItem_exist()==0 && itemExist.getItem_source() == 0){
-								itemPrice = getData.searchItemPrice(getBarData.getCode(),reqItem.getItem_barcode(), getBarData.getUnitCode());
-							}else{
-								itemPrice = itemExist.getItem_price();
-							}
-
-							creatorCode = userCode.getEmployeeCode();
-
-							vCheckExistItem =  itemExist.getItem_exist();
-
-							itemAmount = itemPrice*reqItem.getQty_before();
-
-							System.out.println("SaleName : "+saleCode+"/"+saleName);
-
-							//System.out.println("ItemAmount : "+itemAmount);
-							System.out.println("Source="+itemExist.getItem_source());
-							System.out.println("BillType="+itemExist.getBill_type());
-							System.out.println("getQty_before="+itemExist.getQty_before());
-
-							//System.out.println("Item_Source1 = "+itemExist.getItem_source());
 							if (getBarData.getCode()!=null && getBarData.getCode()!=""){
-								if((reqItem.getQty_before()<=itemExist.getRequest_qty() && itemExist.getItem_source() == 1 && itemExist.getBill_type()==1) || (itemExist.getItem_source()==0)||(itemExist.getItem_source() == 1 && itemExist.getBill_type()==0)){
-
-									System.out.println("Item_Source2 = "+itemExist.getItem_source());
-									
-									if (itemExist.getItem_source()==0){
-										vQty = itemExist.getQty_before();
-									}else{
-										vQty = itemExist.getSale_qty();
-									}
-									
-									if (vCheckExistItem==0){
-										if ((itemExist.getItem_source()==0)||(itemExist.getItem_source()==1 && itemExist.getBill_type()==0)){
-											vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,zoneId) "+ "values("
-													+reqItem.getQueue_id()+",'"+getQueue.getDocNo()+"',CURDATE(),'"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getItem_barcode()+"',"+ vQty+","+reqItem.getQty_before()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIs_cancel()+","+reqItem.getLine_number()+",'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+",'"+getBarData.getZoneId()+"' )";
-											//+reqItem.getqId()+",'"+getQueue.getDocNo()+"','"+dateFormat.format(dateNow)+"','"+ getBarData.getCode()+"','"+getBarData.getItemName()+"','"+getBarData.getUnitCode()+"','"+reqItem.getBarCode()+"',"+ reqItem.getQtyBefore()+","+reqItem.getQtyBefore()+",0,0,"+itemPrice+","+itemAmount+","+getBarData.getRate1()+",'"+userCode.getEmployeeCode()+ "',CURRENT_TIMESTAMP,"+reqItem.getIsCancel()+",0,'"+saleCode+"','"+saleName+"','"+getBarData.getExpertCode()+"','"+getBarData.getDepartmentCode()+"','"+getBarData.getDepartmentName()+"','"+getBarData.getCategoryCode()+"','"+getBarData.getCategoryName()+"','"+getBarData.getSecCode()+"','"+getBarData.getSecName()+"',"+getBarData.getAverageCost()+" )";
-											isSuccess= excecute.execute(dbName,vQuery);
-
-											vQuerySub = "update  Queue set numberofitem = (select count(itemCode) as countItem from QItem where docNo = '"+getQueue.getDocNo()+"') where docNo ='"+getQueue.getDocNo()+"'";
-
-											System.out.println("vQuerySub = "+vQuerySub);
-
-											isSuccess= excecute.execute(dbName,vQuerySub);
-
-											resItem.setSuccess(true);
-											resItem.setError(false);
-											resItem.setMessage("");
-
-										}else{
-											System.out.println("Source = "+itemExist.getItem_source());
-											resItem.setItem(listproduct);
-											resItem.setSuccess(false);
-											resItem.setError(true);
-											resItem.setMessage("Sale Order can not add new item");
-										}
-									}else{
-										if((itemExist.getItem_source()==0 && reqItem.getIs_cancel()==0 && reqItem.getQty_before()!= 0)||(itemExist.getItem_source()==1 && reqItem.getQty_before()!=0 && itemExist.getBill_type() == 0) || (itemExist.getItem_source()==1 && reqItem.getQty_before()<= itemExist.getSale_qty() && itemExist.getBill_type() == 1)){
-											vQuery = "update QItem set qty ="+vQty+",pickQty="+reqItem.getQty_before()+",price ="+itemPrice+",itemAmount="+itemAmount+",isCancel=0,salecode='"+saleCode+"',salename='"+saleName+"',pickerCode ='"+userCode.getEmployeeCode()+"' where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getLine_number();
-										}else{
-											vQuery = "update QItem set qty=0,pickQty = 0,itemAmount=0,isCancel=1,cancelCode='"+creatorCode+"',cancelDate = CURRENT_TIMESTAMP where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber = "+reqItem.getLine_number();
-										}
-
-										isSuccess= excecute.execute(dbName,vQuery);
-
-										resItem.setSuccess(true);
-										resItem.setError(false);
-										resItem.setMessage("");
-
-									}
-									System.out.println(vQuery);
-
+								if(reqItem.getQty_load() != 0){
+				
+									vQuery = "update QItem set loadqty ="+reqItem.getQty_load()+" where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getLine_number();
+									isSuccess= excecute.execute(dbName,vQuery);
 									if(resItem.isSuccess()==true){
 										try{
 
 												Statement st = ds.getStatement(dbName);
-												//vQuery = "call USP_DT_SearchQueueProduct ("+req.getQueue_id()+")";
 												vQuery = "call USP_DT_QueueDataItem ("+reqItem.getQueue_id()+",'"+getBarData.getCode()+"')";
 												ResultSet rs = st.executeQuery(vQuery);
 												System.out.println(vQuery);

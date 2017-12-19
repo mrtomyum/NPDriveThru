@@ -44,6 +44,7 @@ import bean.request.SO_Req_CheckOutManageProductBean;
 import bean.request.SO_Req_EditQueueBean;
 import bean.request.SO_Req_EditSaleOrderBean;
 import bean.request.SO_Req_GenOTPSaleOrderBean;
+import bean.request.SO_Req_LoadManageProductBean;
 import bean.request.SO_Req_PickingManageProductBean;
 import bean.request.SO_Req_QueueId;
 import bean.request.SO_Req_QueueProductBean;
@@ -214,6 +215,19 @@ public class DriveThru {
 		return manageproduct;
 	}
 	
+	
+	@POST
+	@Path("/load/manage_product/")//7.pickup manage product
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SO_Res_PickingManageProductBean loadmanageproduct(SO_Req_LoadManageProductBean req){
+		DriveThruController ctl = new DriveThruController();
+		SO_Res_PickingManageProductBean loadproduct = new SO_Res_PickingManageProductBean();
+		
+		//manageproduct = ctl.PickupManageProduct("DriveThru_Test", req);
+		loadproduct = ctl.LoadManageProduct("SmartQ", req);
+		return loadproduct;
+	}
 	
 	@POST
 	@Path("/checkout/manage_product/")//8.checkout manage product
