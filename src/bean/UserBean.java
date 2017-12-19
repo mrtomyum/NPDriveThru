@@ -20,6 +20,7 @@ public class UserBean {
 	private String lasteditdateTime;
 	private String branchCode;
 	private String remark;
+	private String loginZone;
 	
 	public UserBean() {}
 
@@ -27,7 +28,7 @@ public class UserBean {
 			String image_filename, String email, int role, int activeStatus,
 			int isConfirm, String creatorCode, String createdateTime,
 			String lasteditorCode, String lasteditdateTime, String branchCode,
-			String remark) {
+			String remark, String loginZone) {
 		super();
 		this.id = id;
 		this.code = code;
@@ -44,6 +45,7 @@ public class UserBean {
 		this.lasteditdateTime = lasteditdateTime;
 		this.branchCode = branchCode;
 		this.remark = remark;
+		this.loginZone = loginZone;
 	}
 
 	public int getId() {
@@ -166,6 +168,12 @@ public class UserBean {
 		this.remark = remark;
 	}
 
+	public String getLoginZone() {
+		return loginZone;
+	}
 	
+	public void setLoginZone(String loginZone) {
+		this.loginZone = loginZone;
+	}
 	
 }

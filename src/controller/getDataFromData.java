@@ -206,7 +206,7 @@ public class getDataFromData {
 
         try {
             Statement st = this.ds.getStatement("SmartQ");
-            this.vQuery = "select docno,iscancel,status,carLicence,salecode,ifnull(saleorder,'') as saleorder,ifnull(otpcode,'') as otpcode,ifnull(deliverytype,0) as deliverytype,ifnull(billtype,0) as billtype,ifnull(doctype,0) as doctype,ifnull(taxtype,1) as taxtype,ifnull(pickStatus,0) as pickStatus from Queue where qId = " + qId + " and docdate = CURDATE() limit 1";
+            this.vQuery = "select docno,iscancel,status,carLicence,salecode,ifnull(saleorder,'') as saleorder,ifnull(otpcode,'') as otpcode,ifnull(deliverytype,0) as deliverytype,ifnull(billtype,0) as billtype,ifnull(doctype,0) as doctype,ifnull(taxtype,1) as taxtype,ifnull(pickStatus,0) as pickStatus,isload from Queue where qId = " + qId + " and docdate = CURDATE() limit 1";
             System.out.println("searchQueue :" + this.vQuery);
             ResultSet rs = st.executeQuery(this.vQuery);
 
@@ -223,6 +223,7 @@ public class getDataFromData {
                 this.resQue.setTaxType(rs.getInt("taxType"));
                 this.resQue.setPickStatus(rs.getInt("pickStatus"));
                 this.resQue.setSaleOrder(rs.getString("saleorder"));
+                this.resQue.setIsLoad(rs.getInt("isload"));
             }
 
             rs.close();

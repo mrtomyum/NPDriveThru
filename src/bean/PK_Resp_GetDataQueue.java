@@ -14,6 +14,7 @@ public class PK_Resp_GetDataQueue {
 	private int taxType;
 	private int pickStatus;
 	private String saleOrder;
+	private int isLoad;
 	
 
 	public PK_Resp_GetDataQueue() {
@@ -24,7 +25,7 @@ public class PK_Resp_GetDataQueue {
 	public PK_Resp_GetDataQueue(String docNo, int isCancel, int status,
 			String carLicense, String saleCode, String saleName, String otp_password,
 			int delivery_type, int billtype, int doctype, int taxType,
-			int pickStatus, String saleOrder) {
+			int pickStatus, String saleOrder, int isLoad) {
 		super();
 		this.docNo = docNo;
 		this.isCancel = isCancel;
@@ -39,6 +40,7 @@ public class PK_Resp_GetDataQueue {
 		this.taxType = taxType;
 		this.pickStatus = pickStatus;
 		this.saleOrder = saleOrder;
+		this.isLoad = isLoad;
 	}
 
 
@@ -170,5 +172,11 @@ public class PK_Resp_GetDataQueue {
 		this.saleOrder = saleOrder;
 	}
 
-
+	public int getIsLoad() {
+		return isLoad;
+	}
+	
+	public void setIsLoad(int isLoad) {
+		this.isLoad = isLoad;
+	}
 }

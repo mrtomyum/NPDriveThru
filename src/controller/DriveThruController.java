@@ -1897,6 +1897,8 @@ public class DriveThruController {
 		
 		LoginBean userCode = new LoginBean();
 		String vQuery="";
+		String QueryCheckLoad="";
+		String vQueryLoad="";
 		int vCheckExistItem=0;
 		double itemPrice=0.0;
 		double itemAmount=0.0;
@@ -1906,6 +1908,7 @@ public class DriveThruController {
 		String creatorCode="";
 		double vQty=0.0;
 		String pick_zone_id;
+		int checkCountUnLoad=0;
 
 
 		dtDoc.applyPattern("yyyy-MM-dd");
@@ -1923,19 +1926,51 @@ public class DriveThruController {
 				getQueue = getData.searchQueue(reqItem.getQueue_id());
 
 				if (getQueue.getIsCancel()==0){
+					
+					if (getQueue.getIsCancel()==0){
+						
+					if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1 && getQueue.getDoctype() == 1){
 
-					if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1){
-
-						System.out.println("Error : "+getQueue.getStatus());
+						System.out.println("getQueue.getStatus : "+getQueue.getStatus());
+						
+							getBarData = getData.searchItemCode(reqItem.getItem_barcode());
+							
+							System.out.println("getQueue.getStatus : "+getBarData.getCode());
 
 							if (getBarData.getCode()!=null && getBarData.getCode()!=""){
+								
 								if(reqItem.getQty_load() != 0){
 				
 									vQuery = "update QItem set loadqty ="+reqItem.getQty_load()+" where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getLine_number();
+									System.out.println("vQuery LoadQty" + vQuery);
 									isSuccess= excecute.execute(dbName,vQuery);
-									if(resItem.isSuccess()==true){
-										try{
-
+									
+									try {
+										Statement st_load = ds.getStatement(dbName);
+										QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
+										ResultSet rs_load = st_load.executeQuery(QueryCheckLoad);
+										while(rs_load.next()){
+											checkCountUnLoad = rs_load.getInt("countItemLoad");
+										}
+										rs_load.close();
+										st_load.close();
+										
+										System.out.println("Unload ="+checkCountUnLoad);
+										
+									} catch(Exception e) {
+										resItem.setItem(listproduct);
+										resItem.setSuccess(false);
+										resItem.setError(true);
+										resItem.setMessage(e.getMessage());
+									} 
+									
+									if (checkCountUnLoad==0) {
+										vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
+										System.out.println("vQuery LoadQty" + vQuery);
+										isSuccess= excecute.execute(dbName,vQueryLoad);
+									}
+									
+										try{									
 												Statement st = ds.getStatement(dbName);
 												vQuery = "call USP_DT_QueueDataItem ("+reqItem.getQueue_id()+",'"+getBarData.getCode()+"')";
 												ResultSet rs = st.executeQuery(vQuery);
@@ -1989,7 +2024,7 @@ public class DriveThruController {
 										}finally{
 											ds.close();
 										}
-									}
+									
 								}else{
 									resItem.setItem(listproduct);
 									resItem.setSuccess(false);
@@ -2010,6 +2045,13 @@ public class DriveThruController {
 						resItem.setMessage("Queue is not manage item becuase queue pick status not ready");
 
 					}
+				}else{
+					resItem.setItem(listproduct);
+					resItem.setSuccess(false);
+					resItem.setError(true);
+					resItem.setMessage("Queue is loaded");
+
+				}
 				}else{
 					resItem.setItem(listproduct);
 					resItem.setSuccess(false);
