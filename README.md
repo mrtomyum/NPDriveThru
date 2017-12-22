@@ -66,11 +66,10 @@ XX X  X  X XX       |  +-----------+   |                   |                   |
 
 ทั้งนี้คือให้ยึดหลักการขอตะกร้าชอปปิ้งเสมอ
 
-Order / Payment||
-xxx|Cash|Credit
------
-Shopping| Y|Y
-Drive-Thru|Y|Y
-Sale Order|Y|N
-Online Pickup |Y|N
-Online Delivery |N|N
+| Order/Payment   | Cash  | Credit |
+| --------------- | :---: | :----: |
+| Shopping        | Y     | Y      |
+| Drive-Thru      | Y     | Y      |
+| Sale Order      | Y     | N      |
+| Online Pickup   | Y     | N      |
+| Online Delivery | N     | N      |
