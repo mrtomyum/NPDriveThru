@@ -338,6 +338,7 @@ public class DriveThruController {
 		    user.setCreatedateTime(null);
 		    user.setLasteditorCode(null);
 		    user.setLasteditdateTime(null);
+		    user.setLoginZone(null);
 	}
 	
 	
@@ -384,6 +385,7 @@ public class DriveThruController {
 		    		    user.setCreatedateTime(rs.getString("createdateTime"));
 		    		    user.setLasteditorCode(rs.getString("lasteditorCode"));
 		    		    user.setLasteditdateTime(rs.getString("lasteditdateTime"));
+		    		    user.setLoginZone(rs.getString("zoneid"));
 		        		
 		        		String uuid = UUID.randomUUID().toString(); 
 		        		loginResponse.setAccessToken(uuid);
@@ -461,9 +463,9 @@ public class DriveThruController {
 		
 		if (loginResponse.getAccessToken()!=null && connect == true){
 		
-		Textstring="insert UserAccess(userId,userCode,userUUID,branchCode,dateTimeStamp)"
+		Textstring="insert UserAccess(userId,userCode,userUUID,branchCode,zoneid,dateTimeStamp)"
 				+" select '" +loginResponse.getUser().getId()+"','"+loginResponse.getUser().getCode()
-					+"','"+loginResponse.getAccessToken()+"','"+branchCode+"','"+loginResponse.getAccessDatetime()+"'";
+					+"','"+loginResponse.getAccessToken()+"','"+branchCode+"','"+user.getLoginZone()+"','"+loginResponse.getAccessDatetime()+"'";
 		
 						
 		 System.out.println(Textstring);
@@ -560,7 +562,7 @@ public class DriveThruController {
 			    		    if (login.getAccess_token()!=null){
 			    				
 			    				Textstring="insert UserAccess(userId,userCode,userUUID,app_id,branchCode,zoneid,dateTimeStamp)"
-			    						+" select '" +rs.getInt("id")+"','"+req.getUser_code()+"','"+login.getAccess_token()+"','Pos_DriveThru','"+req.getCompany_id()+"','"+req.getZone_id()+"',CURRENT_TIMESTAMP()";
+			    						+" select '" +rs.getInt("id")+"','"+req.getUser_code()+"','"+login.getAccess_token()+"','Pos_DriveThru','"+req.getCompany_id()+"','"+rs.getString("zoneid")+"',CURRENT_TIMESTAMP()";
 			    				
 			    								
 			    				 System.out.println("Textstring = "+Textstring);
@@ -580,7 +582,7 @@ public class DriveThruController {
 				    					userlogin.setCompany_id(req.getCompany_id());
 				    					userlogin.setSale_code(rs.getString("code"));
 				    					userlogin.setUser_name(rs.getString("name"));
-				    					userlogin.setZone_id(req.getZone_id());
+				    					userlogin.setZone_id(rs.getString("zoneid"));
 				    					userlogin.setPic_profile(rs.getString("picturePath"));
 				    					
 				    					
@@ -1103,6 +1105,7 @@ public class DriveThruController {
 								evt_item.setItem_unit_code(rs_item.getString("unitcode"));
 								evt_item.setLine_number(rs_item.getInt("linenumber"));
 								evt_item.setItem_qty(rs_item.getDouble("qty"));
+								evt_item.setPick_zone_id(rs_item.getString("zoneid"));
 
 								list_item.add(evt_item);
 
@@ -1267,6 +1270,8 @@ public class DriveThruController {
 		boolean checkData;
 		
 		//call USP_DT_SearchListQueue('','','',0,'1')
+		
+		System.out.println("Search Queue List");
 		try {
 					
 			Statement st = ds.getStatement(dbName);
@@ -1810,6 +1815,7 @@ public class DriveThruController {
 													evt.setItem_unit_code(rs.getString("unitcode"));
 													evt.setLine_number(rs.getInt("linenumber"));
 													evt.setItem_qty(rs.getDouble("qty"));
+													evt.setPick_zone_id(rs.getString("zoneid"));
 													
 													listproduct.add(evt);
 
@@ -2000,6 +2006,7 @@ public class DriveThruController {
 													evt.setItem_unit_code(rs.getString("unitcode"));
 													evt.setLine_number(rs.getInt("linenumber"));
 													evt.setItem_qty(rs.getDouble("qty"));
+													evt.setPick_zone_id(rs.getString("zoneid"));
 													
 													listproduct.add(evt);
 
@@ -2246,6 +2253,7 @@ public class DriveThruController {
 											evt.setItem_unit_code(rs.getString("unitcode"));
 											evt.setLine_number(rs.getInt("linenumber"));
 											evt.setItem_qty(rs.getDouble("qty"));
+											evt.setPick_zone_id(rs.getString("zoneid"));
 											
 											listproduct.add(evt);
 
@@ -2439,6 +2447,7 @@ public class DriveThruController {
 								evt.setItem_unit_code(rs.getString("unitcode"));
 								evt.setLine_number(rs.getInt("linenumber"));
 								evt.setItem_qty(rs.getDouble("qty"));
+								evt.setPick_zone_id(rs.getString("zoneid"));
 								
 								listproduct.add(evt);
 
@@ -2757,6 +2766,7 @@ public class DriveThruController {
 														evt.setItem_unit_code(rs.getString("unitcode"));
 														evt.setLine_number(rs.getInt("linenumber"));
 														evt.setItem_qty(rs.getDouble("qty"));
+														evt.setPick_zone_id(rs.getString("zoneid"));
 
 														listproduct.add(evt);
 
@@ -3311,6 +3321,7 @@ public class DriveThruController {
 						evt.setItem_unit_code(rs.getString("unitcode"));
 						evt.setLine_number(rs.getInt("linenumber"));
 						evt.setItem_qty(rs.getDouble("qty"));
+						evt.setPick_zone_id(rs.getString("zoneid"));
 
 						listproduct.add(evt);
 

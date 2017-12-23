@@ -75,6 +75,4 @@ public class LoginResponseBean {
 		this.user = user;
 	}
 
-	
-
 }
