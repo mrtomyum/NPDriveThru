@@ -1317,13 +1317,22 @@ public class DriveThruController {
 				
 				
 				if  (req.getQueue_id()!=null) {
-					System.out.println("Queue ID = "+ req.getQueue_id());
-					checkData = data.updateSaleOrderQtyRequestData(db, dbName, req.getQueue_id(), rs.getString("saleorder"));
+					if (rs.getInt("docType")==1) {
+						System.out.println("Queue ID = "+ req.getQueue_id());
+						checkData = data.updateSaleOrderQtyRequestData(db, dbName, req.getQueue_id(), rs.getString("saleorder"));
+						
+						data.UpdateSaleOrderData(dbName, db, rs.getInt("qid"));
+						
+						System.out.println("qid = "+ rs.getInt("qid"));
+					}
 				}
 				
 				List<SO_Res_ListProductQueueBean>list_item = new ArrayList<SO_Res_ListProductQueueBean>();
 				
 				try {
+				
+
+
 				Statement st_item = ds.getStatement(dbName);
 				vQuery = "call USP_DT_SearchQueueProduct ("+rs.getInt("qid")+")";
 				ResultSet rs_item = st_item.executeQuery(vQuery);
@@ -1901,6 +1910,8 @@ public class DriveThruController {
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
 		PK_Resp_SaleCodeDetails lastSale = new PK_Resp_SaleCodeDetails();
 		
+		PK_Resp_SaleCodeDetails saleCode = new PK_Resp_SaleCodeDetails();
+		
 		LoginBean userCode = new LoginBean();
 		String vQuery="";
 		String QueryCheckLoad="";
@@ -1909,9 +1920,7 @@ public class DriveThruController {
 		double itemPrice=0.0;
 		double itemAmount=0.0;
 		String vQuerySub;
-		String saleCode="";
-		String saleName="";
-		String creatorCode="";
+//		String creatorCode="";
 		double vQty=0.0;
 		String pick_zone_id;
 		int checkCountUnLoad=0;
@@ -1926,152 +1935,176 @@ public class DriveThruController {
 
 		SO_Res_CheckQueueItemBean itemExist = new SO_Res_CheckQueueItemBean();
 
-		if (reqItem.getQueue_id()!=0){
-			if (reqItem.getItem_barcode()!=null && reqItem.getItem_barcode()!=""){
-				System.out.println("1");
-				getQueue = getData.searchQueue(reqItem.getQueue_id());
-
-				if (getQueue.getIsCancel()==0){
-					
-					if (getQueue.getIsCancel()==0){
-						
-					if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1 && getQueue.getDoctype() == 1){
-
-						System.out.println("getQueue.getStatus : "+getQueue.getStatus());
-						
-							getBarData = getData.searchItemCode(reqItem.getItem_barcode());
-							
-							System.out.println("getQueue.getStatus : "+getBarData.getCode());
-
-							if (getBarData.getCode()!=null && getBarData.getCode()!=""){
-								
-								if(reqItem.getQty_load() != 0){
+		if (reqItem.getItem().get(0).getQueue_id() !=0){
+			getQueue = getData.searchQueue(reqItem.getItem().get(0).getQueue_id());
+			
+			if(getQueue.getDelivery_type() == 1) {
+				saleCode = getData.searchSaleCode(reqItem.getOtp_password());
+			}else {
+				saleCode.setSaleCode("");
+				saleCode.setSaleName("");
+			}
+			
+			if (((getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals(""))|| (reqItem.getOtp_password().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)) ) {
 				
-									vQuery = "update QItem set loadqty ="+reqItem.getQty_load()+" where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getLine_number();
-									System.out.println("vQuery LoadQty" + vQuery);
-									isSuccess= excecute.execute(dbName,vQuery);
+				for(int n=0; n<reqItem.getItem().size(); n++) {
+					
+					if (reqItem.getItem().get(n).getItem_barcode()!=null && reqItem.getItem().get(n).getItem_barcode()!=""){
+						System.out.println("1");
+						getQueue = getData.searchQueue(reqItem.getItem().get(n).getQueue_id());
+		
+						if (getQueue.getIsCancel()==0){
+							
+							if (getQueue.getIsCancel()==0){
+								
+							if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1 && getQueue.getDoctype() == 1){
+		
+								System.out.println("getQueue.getStatus : "+getQueue.getStatus());
+								
+									getBarData = getData.searchItemCode(reqItem.getItem().get(n).getItem_barcode());
 									
-									try {
-										Statement st_load = ds.getStatement(dbName);
-										QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
-										ResultSet rs_load = st_load.executeQuery(QueryCheckLoad);
-										while(rs_load.next()){
-											checkCountUnLoad = rs_load.getInt("countItemLoad");
-										}
-										rs_load.close();
-										st_load.close();
+									System.out.println("getQueue.getStatus : "+getBarData.getCode());
+		
+									if (getBarData.getCode()!=null && getBarData.getCode()!=""){
 										
-										System.out.println("Unload ="+checkCountUnLoad);
-										
-									} catch(Exception e) {
-										resItem.setItem(listproduct);
-										resItem.setSuccess(false);
-										resItem.setError(true);
-										resItem.setMessage(e.getMessage());
-									} 
-									
-									if (checkCountUnLoad==0) {
-										vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
-										System.out.println("vQuery LoadQty" + vQuery);
-										isSuccess= excecute.execute(dbName,vQueryLoad);
-									}
-									
-										try{									
-												Statement st = ds.getStatement(dbName);
-												vQuery = "call USP_DT_QueueDataItem ("+reqItem.getQueue_id()+",'"+getBarData.getCode()+"')";
-												ResultSet rs = st.executeQuery(vQuery);
-												System.out.println(vQuery);
-												
-												listproduct.clear();
-												SO_Res_ListProductQueueBean evt;
-												System.out.println("Count"+rs.getRow());
-												while(rs.next()){
-													
-													evt = new SO_Res_ListProductQueueBean();
-													evt.setFile_path(rs.getString("filepath"));
-													evt.setIs_cancel(rs.getInt("itemcancel"));
-													evt.setIs_check(rs.getInt("ischeckout"));
-													evt.setItem_barcode(rs.getString("barcode"));
-													evt.setItem_code(rs.getString("itemcode"));
-													evt.setItem_name(rs.getString("itemname"));
-													evt.setPickup_staff_name(rs.getString("pickername"));
-													evt.setSale_code(rs.getString("salecode"));
-													evt.setItem_price(rs.getDouble("price"));
-													evt.setQty_after(rs.getDouble("checkoutqty"));
-													evt.setQty_before(rs.getDouble("pickqty"));
-													evt.setRequest_qty(rs.getDouble("reqqty"));
-													evt.setQty_load(rs.getDouble("loadqty"));
-													evt.setTotal_price_after(rs.getDouble("checkoutamount"));
-													evt.setTotal_price_before(rs.getDouble("itemamount"));
-													evt.setItem_unit_code(rs.getString("unitcode"));
-													evt.setLine_number(rs.getInt("linenumber"));
-													evt.setItem_qty(rs.getDouble("qty"));
-													evt.setPick_zone_id(rs.getString("zoneid"));
-													
-													listproduct.add(evt);
-
+										if(reqItem.getItem().get(n).getQty_load() != 0){
+						
+											vQuery = "update QItem set loadqty ="+reqItem.getItem().get(n).getQty_load()+" where qId = "+ reqItem.getItem().get(n).getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem().get(n).getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getItem().get(n).getLine_number();
+											System.out.println("vQuery LoadQty" + vQuery);
+											isSuccess= excecute.execute(dbName,vQuery);
+											
+											try {
+												Statement st_load = ds.getStatement(dbName);
+												QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getItem().get(n).getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
+												ResultSet rs_load = st_load.executeQuery(QueryCheckLoad);
+												while(rs_load.next()){
+													checkCountUnLoad = rs_load.getInt("countItemLoad");
 												}
+												rs_load.close();
+												st_load.close();
 												
-												rs.close();
-												st.close();
+												System.out.println("Unload ="+checkCountUnLoad);
 												
-												queuedata.setItem(listproduct);
-												
-
-											resItem.setItem(listproduct);
-											resItem.setSuccess(true);
-											resItem.setError(false);
-											resItem.setMessage("");
-
-										}catch(Exception e){
+											} catch(Exception e) {
+												resItem.setItem(listproduct);
+												resItem.setSuccess(false);
+												resItem.setError(true);
+												resItem.setMessage(e.getMessage());
+											} 
+											
+											if (checkCountUnLoad==0) {
+												vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getItem().get(n).getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
+												System.out.println("vQuery LoadQty" + vQuery);
+												isSuccess= excecute.execute(dbName,vQueryLoad);
+											}
+											
+												try{									
+														Statement st = ds.getStatement(dbName);
+														vQuery = "call USP_DT_QueueDataItem ("+reqItem.getItem().get(n).getQueue_id()+",'"+getBarData.getCode()+"')";
+														ResultSet rs = st.executeQuery(vQuery);
+														System.out.println(vQuery);
+														
+														listproduct.clear();
+														SO_Res_ListProductQueueBean evt;
+														System.out.println("Count"+rs.getRow());
+														while(rs.next()){
+															
+															evt = new SO_Res_ListProductQueueBean();
+															evt.setFile_path(rs.getString("filepath"));
+															evt.setIs_cancel(rs.getInt("itemcancel"));
+															evt.setIs_check(rs.getInt("ischeckout"));
+															evt.setItem_barcode(rs.getString("barcode"));
+															evt.setItem_code(rs.getString("itemcode"));
+															evt.setItem_name(rs.getString("itemname"));
+															evt.setPickup_staff_name(rs.getString("pickername"));
+															evt.setSale_code(rs.getString("salecode"));
+															evt.setItem_price(rs.getDouble("price"));
+															evt.setQty_after(rs.getDouble("checkoutqty"));
+															evt.setQty_before(rs.getDouble("pickqty"));
+															evt.setRequest_qty(rs.getDouble("reqqty"));
+															evt.setQty_load(rs.getDouble("loadqty"));
+															evt.setTotal_price_after(rs.getDouble("checkoutamount"));
+															evt.setTotal_price_before(rs.getDouble("itemamount"));
+															evt.setItem_unit_code(rs.getString("unitcode"));
+															evt.setLine_number(rs.getInt("linenumber"));
+															evt.setItem_qty(rs.getDouble("qty"));
+															evt.setPick_zone_id(rs.getString("zoneid"));
+															
+															listproduct.add(evt);
+		
+														}
+														
+														rs.close();
+														st.close();
+														
+														queuedata.setItem(listproduct);
+														
+		
+													resItem.setItem(listproduct);
+													resItem.setSuccess(true);
+													resItem.setError(false);
+													resItem.setMessage("");
+		
+												}catch(Exception e){
+													resItem.setItem(listproduct);
+													resItem.setSuccess(false);
+													resItem.setError(true);
+													resItem.setMessage(e.getMessage());
+												}finally{
+													ds.close();
+												}
+											
+										}else{
 											resItem.setItem(listproduct);
 											resItem.setSuccess(false);
 											resItem.setError(true);
-											resItem.setMessage(e.getMessage());
-										}finally{
-											ds.close();
+											resItem.setMessage("Pick Qty more than request qty");
 										}
-									
-								}else{
-									resItem.setItem(listproduct);
-									resItem.setSuccess(false);
-									resItem.setError(true);
-									resItem.setMessage("Pick Qty more than request qty");
-								}
+									}else{
+										resItem.setItem(listproduct);
+										resItem.setSuccess(false);
+										resItem.setError(true);
+										resItem.setMessage("No have barcode");
+									}
+		
 							}else{
 								resItem.setItem(listproduct);
 								resItem.setSuccess(false);
 								resItem.setError(true);
-								resItem.setMessage("No have barcode");
+								resItem.setMessage("Queue is not manage item becuase queue pick status not ready");
+		
 							}
-
+						}else{
+							resItem.setItem(listproduct);
+							resItem.setSuccess(false);
+							resItem.setError(true);
+							resItem.setMessage("Queue is loaded");
+		
+						}
+						}else{
+							resItem.setItem(listproduct);
+							resItem.setSuccess(false);
+							resItem.setError(true);
+							resItem.setMessage("Queue is cancel");
+		
+						}
 					}else{
+						//==============================
 						resItem.setItem(listproduct);
 						resItem.setSuccess(false);
 						resItem.setError(true);
-						resItem.setMessage("Queue is not manage item becuase queue pick status not ready");
-
+						resItem.setMessage("Barcode is null");
 					}
-				}else{
-					resItem.setItem(listproduct);
-					resItem.setSuccess(false);
-					resItem.setError(true);
-					resItem.setMessage("Queue is loaded");
-
 				}
-				}else{
-					resItem.setItem(listproduct);
-					resItem.setSuccess(false);
-					resItem.setError(true);
-					resItem.setMessage("Queue is cancel");
+		
+				
+				
 
-				}
-			}else{
-				//==============================
+			}else {
 				resItem.setItem(listproduct);
 				resItem.setSuccess(false);
 				resItem.setError(true);
-				resItem.setMessage("Barcode is null");
+				resItem.setMessage("otp_password is invalid");
 			}
 		}else{
 			//===================================
@@ -2670,7 +2703,7 @@ public class DriveThruController {
 												String vQueryOwner;
 												String vQueryReceive;
 												
-												data.UpdateSaleOrderData(dbName, db, req);
+												//data.UpdateSaleOrderData(dbName, db, req.getQueue_id());
 
 												vQueryOwner="delete from OrderOwnerPhone where doc_date = CURDATE() and queue_id = '"+req.getQueue_id()+"'";
 												isSuccess= excecute.execute(dbName,vQueryOwner);
@@ -2704,6 +2737,7 @@ public class DriveThruController {
 
 													//ห้ามลืม แก้ไข คนรับของข้อมูลที่ต้องการอัพเดทใน คิวด้วย ไม่ใช่แค่สินค้า
 													vQuery = "exec dbo.USP_NP_UpdatePickItemDriveThru '"+getQueue.getSaleOrder()+"','"+req.getPlate_number()+"','"+req.getItem().get(i).getItem_code()+"',"+req.getItem().get(i).getRequest_qty()+",'"+req.getItem().get(i).getItem_unit_code()+"',"+req.getItem().get(i).getLine_number();
+													System.out.println("vQuery Update Item = "+vQuery);
 													isSuccess = npExec.executeSqlBranch(db, vQuery);
 
 													vMyQuery = "call USP_DT_UpdateSaleOrderQItem ('"+getQueue.getSaleOrder()+"','"+req.getItem().get(i).getItem_code()+"','"+req.getItem().get(i).getItem_unit_code()+"',"+req.getItem().get(i).getRequest_qty()+","+req.getItem().get(i).getLine_number()+")";
@@ -4699,6 +4733,7 @@ public class DriveThruController {
 
 										System.out.println("SaleCodeBill = "+bill.getBillHeader().getSaleCode());
 										
+										String vQueryTax="";
 										
 										vQuery = "exec dbo.USP_API_InsertArInvoice "
 										+" '"+bill.getBillHeader().getDocNo()+"',"
@@ -4718,7 +4753,7 @@ public class DriveThruController {
 										+" "+bill.getBillHeader().getNetDebtAmount()+","
 										+" "+bill.getBillHeader().getIsConditionSend()+",'"+bill.getBillHeader().getSoRefNo()+"',"
 										+" '"+userCode.getEmployeeCode()+"','"+bill.getBillHeader().getRecurName()+"'";
-
+										
 //										vQuery = "set dateformat dmy  insert into dbo.BCARInvoice(docNo,docDate,taxNo,taxType,arCode,arName,arAddress,cashierCode,"
 //												+"machineNo,machineCode,posStatus,billTime,creditType,creditNo,cofirmNo,chargeWord,creditBaseAmount,"
 //												+"chargeAmount,grandTotal,coupongAmount,changeAmount,departCode,creditDay,dueDate,saleCode,taxRate,"
@@ -4758,6 +4793,9 @@ public class DriveThruController {
 										
 										isSuccess = npExec.executeSql(db.getServerName(),db.getDbName(), vQuery);
 
+										
+										vQueryTax = "exec dbo.USP_API_InsertOutPutTax "+bill.getBillHeader().getBillType()+",'"+bill.getBillHeader().getDocNo()+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocNo()+"','"+bill.getBillHeader().getArCode()+"',"+bill.getBillHeader().getBeforeTaxAmount()+","+bill.getBillHeader().getTaxAmount()+",'"+userCode.getEmployeeCode()+"'";
+										isSuccess = npExec.executeSql(db.getServerName(),db.getDbName(), vQueryTax);
 
 										System.out.println("InvoiceSub :"+sub.size());
 

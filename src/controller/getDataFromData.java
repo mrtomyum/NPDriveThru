@@ -2121,7 +2121,7 @@ public class getDataFromData {
         return encodedBytes;
     }
     
-    public void UpdateSaleOrderData(String dbName,DT_User_LoginBranchBean db,SO_Req_EditSaleOrderBean req) {
+    public void UpdateSaleOrderData(String dbName,DT_User_LoginBranchBean db, int queue_id) {
     	SO_Res_ItemSaleOrderBean item_saleorder = new SO_Res_ItemSaleOrderBean();
     	double itemPrice;
     	int vCheckExistItem;
@@ -2136,7 +2136,7 @@ public class getDataFromData {
     		
     		PK_Resp_GetDataQueue QueueData = new PK_Resp_GetDataQueue();
     		
-    		QueueData = searchQueue(req.getQueue_id());
+    		QueueData = searchQueue(queue_id);
     		
     		saleCode = QueueData.getSaleCode();
     		saleName = QueueData.getSaleName();
@@ -2177,17 +2177,17 @@ public class getDataFromData {
 								if (vCheckExistItem==0 && rs_sub.getDouble("remainqty")>0){
 
 									vQuery = "insert into QItem(qId,docNo,docDate,itemCode,itemName,unitCode,barCode,qty,reqQty,pickQty,loadQty,checkoutQty,price,itemAmount,rate1,pickerCode,pickDate,isCancel,lineNumber,saleCode,saleName,expertCode,departCode,departName,catCode,catName,secManCode,secManName,averageCost,whcode,shelfcode,zoneid,pickzone) "+ "values("
-											+req.getQueue_id()+",'"+QueueData.getDocNo()+"',CURDATE(),'"+ rs_sub.getString("itemcode")+"','"+rs_sub.getString("itemname")+"','"+rs_sub.getString("unitcode")+"','"+rs_sub.getString("barcode")+"',"+ rs_sub.getDouble("remainqty")+","+rs_sub.getDouble("remainqty")+",0,0,0,"+itemPrice+","+itemAmount+","+rs_sub.getInt("packingrate1")+",'',CURRENT_TIMESTAMP,0,"+rs_sub.getInt("linenumber")+",'"+saleCode+"','"+saleName+"','','','','','','','',"+ rs_sub.getDouble("AverageCost")+",'"+rs_sub.getString("whcode")+"','"+rs_sub.getString("shelfcode")+"','"+rs_sub.getString("zoneid")+"','"+rs_sub.getString("pickzone")+"' )";
-									System.out.println("QuerySub :"+vQuery);
+											+queue_id+",'"+QueueData.getDocNo()+"',CURDATE(),'"+ rs_sub.getString("itemcode")+"','"+rs_sub.getString("itemname")+"','"+rs_sub.getString("unitcode")+"','"+rs_sub.getString("barcode")+"',"+ rs_sub.getDouble("remainqty")+","+rs_sub.getDouble("remainqty")+",0,0,0,"+itemPrice+","+itemAmount+","+rs_sub.getInt("packingrate1")+",'',CURRENT_TIMESTAMP,0,"+rs_sub.getInt("linenumber")+",'"+saleCode+"','"+saleName+"','','','','','','','',"+ rs_sub.getDouble("AverageCost")+",'"+rs_sub.getString("whcode")+"','"+rs_sub.getString("shelfcode")+"','"+rs_sub.getString("zoneid")+"','"+rs_sub.getString("pickzone")+"' )";
+									System.out.println("QueryInsert :"+vQuery);
 									isSuccess= excecute.execute(dbName,vQuery);
 
-									vQueryLog = "exec dbo.USP_NP_InsertPickItemDriveThru '"+QueueData.getSaleOrder()+"','"+QueueData.getOtp_password()+"','"+req.getPlate_number()+"','"+rs_sub.getString("itemcode")+"',"+rs_sub.getDouble("remainqty")+",'"+rs_sub.getString("unitcode")+"','"+rs_sub.getString("whcode")+"','"+rs_sub.getString("shelfcode")+"','','',0,"+rs_sub.getInt("linenumber");
+									vQueryLog = "exec dbo.USP_NP_InsertPickItemDriveThru '"+QueueData.getSaleOrder()+"','"+QueueData.getOtp_password()+"','"+QueueData.getCarLicense()+"','"+rs_sub.getString("itemcode")+"',"+rs_sub.getDouble("remainqty")+",'"+rs_sub.getString("unitcode")+"','"+rs_sub.getString("whcode")+"','"+rs_sub.getString("shelfcode")+"','','',0,"+rs_sub.getInt("linenumber");
 									System.out.println("vQueryLog = "+vQueryLog);
 
 									isSuccess= npExec.executeSqlBranch(db,vQueryLog);
 
 								}else{
-									vQuery = "update QItem set qty ="+rs_sub.getDouble("remainqty")+",reqQty="+rs_sub.getDouble("remainqty")+",price ="+itemPrice +",itemAmount="+itemAmount+",isCancel=0,salecode='"+saleCode+"',salename='"+saleName+"' where qId = "+req.getQueue_id()+" and docNo ='"+vGenNewDocNo+"' and itemCode='"+rs_sub.getString("itemcode")+"' and barCode ='"+rs_sub.getString("barcode")+"' and unitCode ='"+rs_sub.getString("unitcode")+"' and lineNumber ="+rs_sub.getInt("linenumber");
+									vQuery = "update QItem set qty ="+rs_sub.getDouble("remainqty")+",reqQty="+rs_sub.getDouble("remainqty")+",price ="+itemPrice +",itemAmount="+itemAmount+",isCancel=0,salecode='"+saleCode+"',salename='"+saleName+"' where qId = "+queue_id+" and docNo ='"+vGenNewDocNo+"' and itemCode='"+rs_sub.getString("itemcode")+"' and barCode ='"+rs_sub.getString("barcode")+"' and unitCode ='"+rs_sub.getString("unitcode")+"' and lineNumber ="+rs_sub.getInt("linenumber");
 									System.out.println("QuerySub :"+vQuery);
 									isSuccess= excecute.execute(dbName,vQuery);
 								}
