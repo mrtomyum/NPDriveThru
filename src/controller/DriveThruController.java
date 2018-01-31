@@ -1935,8 +1935,8 @@ public class DriveThruController {
 
 		SO_Res_CheckQueueItemBean itemExist = new SO_Res_CheckQueueItemBean();
 
-		if (reqItem.getItem().get(0).getQueue_id() !=0){
-			getQueue = getData.searchQueue(reqItem.getItem().get(0).getQueue_id());
+		if (reqItem.getQueue_id() !=0){
+			getQueue = getData.searchQueue(reqItem.getQueue_id());
 			
 			if(getQueue.getDelivery_type() == 1) {
 				saleCode = getData.searchSaleCode(reqItem.getOtp_password());
@@ -1945,13 +1945,18 @@ public class DriveThruController {
 				saleCode.setSaleName("");
 			}
 			
+			System.out.println("getQueue.getDelivery_type() = "+getQueue.getDelivery_type());
+			System.out.println("saleCode.getSaleName() = "+saleCode.getSaleName());
+			System.out.println("reqItem.getOtp_password() = "+reqItem.getOtp_password());
+			System.out.println("getQueue.getDelivery_type() = "+getQueue.getDelivery_type());
+			
 			if (((getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals(""))|| (reqItem.getOtp_password().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)) ) {
 				
 				for(int n=0; n<reqItem.getItem().size(); n++) {
 					
 					if (reqItem.getItem().get(n).getItem_barcode()!=null && reqItem.getItem().get(n).getItem_barcode()!=""){
 						System.out.println("1");
-						getQueue = getData.searchQueue(reqItem.getItem().get(n).getQueue_id());
+						getQueue = getData.searchQueue(reqItem.getQueue_id());
 		
 						if (getQueue.getIsCancel()==0){
 							
@@ -1967,15 +1972,20 @@ public class DriveThruController {
 		
 									if (getBarData.getCode()!=null && getBarData.getCode()!=""){
 										
-										if(reqItem.getItem().get(n).getQty_load() != 0){
-						
-											vQuery = "update QItem set loadqty ="+reqItem.getItem().get(n).getQty_load()+" where qId = "+ reqItem.getItem().get(n).getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem().get(n).getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getItem().get(n).getLine_number();
+										SO_Res_CheckQueueItemBean checkItem = new SO_Res_CheckQueueItemBean();
+										
+										checkItem = data.checkItemExistLoadProduct(reqItem.getQueue_id(), reqItem.getItem().get(n).getItem_barcode(), reqItem.getItem().get(n).getLine_number());
+										
+										if(reqItem.getItem().get(n).getQty_load() <= checkItem.getQty_before()){
+											
+											System.out.println("Pick Qty =" + checkItem.getQty_before());
+											vQuery = "update QItem set loadqty =loadQty+"+reqItem.getItem().get(n).getQty_load()+" where qId = "+ reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem().get(n).getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getItem().get(n).getLine_number();
 											System.out.println("vQuery LoadQty" + vQuery);
 											isSuccess= excecute.execute(dbName,vQuery);
 											
 											try {
 												Statement st_load = ds.getStatement(dbName);
-												QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getItem().get(n).getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
+												QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
 												ResultSet rs_load = st_load.executeQuery(QueryCheckLoad);
 												while(rs_load.next()){
 													checkCountUnLoad = rs_load.getInt("countItemLoad");
@@ -1993,14 +2003,14 @@ public class DriveThruController {
 											} 
 											
 											if (checkCountUnLoad==0) {
-												vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getItem().get(n).getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
+												vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
 												System.out.println("vQuery LoadQty" + vQuery);
 												isSuccess= excecute.execute(dbName,vQueryLoad);
 											}
 											
 												try{									
 														Statement st = ds.getStatement(dbName);
-														vQuery = "call USP_DT_QueueDataItem ("+reqItem.getItem().get(n).getQueue_id()+",'"+getBarData.getCode()+"')";
+														vQuery = "call USP_DT_QueueDataItem ("+reqItem.getQueue_id()+",'"+getBarData.getCode()+"')";
 														ResultSet rs = st.executeQuery(vQuery);
 														System.out.println(vQuery);
 														
@@ -2058,7 +2068,7 @@ public class DriveThruController {
 											resItem.setItem(listproduct);
 											resItem.setSuccess(false);
 											resItem.setError(true);
-											resItem.setMessage("Pick Qty more than request qty");
+											resItem.setMessage("Load Qty more than Pick qty");
 										}
 									}else{
 										resItem.setItem(listproduct);

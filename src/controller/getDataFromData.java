@@ -751,6 +751,52 @@ public class getDataFromData {
 
         return itemexist;
     }
+    
+    
+    public SO_Res_CheckQueueItemBean checkItemExistLoadProduct(int que_id, String bar_code, int line_number) {
+        new PK_Resp_GetItemBarcodeBean();
+        this.dtDoc.applyPattern("yyyy-MM-dd");
+        this.dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
+        int vExist = 0;
+        SO_Res_CheckQueueItemBean itemexist = new SO_Res_CheckQueueItemBean();
+        PK_Resp_GetItemBarcodeBean getItemCode = this.searchItemCode(bar_code);
+
+        try {
+            Statement st = this.ds.getStatement("SmartQ");
+            this.vQuery = "call USP_DT_CheckItemSOData (" + que_id + ",'" + getItemCode.getCode() + "'," +line_number + ") ";
+            System.out.println("ExistQueue :" + this.vQuery);
+            ResultSet rs = st.executeQuery(this.vQuery);
+
+            while(rs.next()) {
+                itemexist.setItem_barcode(rs.getString("barcode"));
+                itemexist.setItem_code(rs.getString("itemcode"));
+                itemexist.setItem_exist(rs.getInt("itemexist"));
+                itemexist.setItem_price(rs.getDouble("price"));
+                itemexist.setItem_source(rs.getInt("doctype"));
+                itemexist.setItem_unitcode(rs.getString("unitcode"));
+                itemexist.setSale_code(rs.getString("salecode"));
+                itemexist.setSale_name(rs.getString("salename"));
+                itemexist.setRequest_qty(rs.getDouble("reqqty"));
+                itemexist.setItem_name(rs.getString("itemname"));
+                itemexist.setItem_filepath(rs.getString("filepath"));
+                itemexist.setQty_before(rs.getDouble("loadQty"));
+                itemexist.setBefore_amount(rs.getDouble("itemamount"));
+                itemexist.setQty_after(rs.getDouble("checkoutQty"));
+                itemexist.setAfter_amount(rs.getDouble("checkoutAmount"));
+                itemexist.setBill_type(rs.getInt("billtype"));
+                itemexist.setSale_qty(rs.getDouble("qty"));
+            }
+
+            rs.close();
+            st.close();
+        } catch (Exception var10) {
+            var10.printStackTrace();
+        } finally {
+            this.ds.close();
+        }
+
+        return itemexist;
+    }
 
     public SO_Res_CheckQueueItemBean checkItemExistCheckOutProduct(SO_Req_CheckOutManageProductBean reqItem) {
         new PK_Resp_GetItemBarcodeBean();
