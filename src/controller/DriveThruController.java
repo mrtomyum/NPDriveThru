@@ -1369,10 +1369,12 @@ public class DriveThruController {
 				
 				rs_item.close();
 				st_item.close();
-				} catch (Exception e) {
-					// TODO: handle exception
+				} catch(SQLException e){
+					que_data.setSuccess(false);
+					que_data.setError(true);
+					que_data.setMessage("USP_DT_SearchQueueProduct"+e.getMessage());
 				}finally{
-					ds.close();	
+					//ds.close();	
 				}
 				
 				
@@ -1405,10 +1407,12 @@ public class DriveThruController {
 				}
 				rs_owner.close();
 				st_owner.close();
-				} catch(Exception e){
-					
+				} catch(SQLException e){
+					que_data.setSuccess(false);
+					que_data.setError(true);
+					que_data.setMessage("USP_DT_SearchOwnerPhone"+e.getMessage());
 				}finally{
-					ds.close();
+					//ds.close();
 				}
 			
 				ArrayList<String> listowner = new ArrayList<>();
@@ -1444,10 +1448,12 @@ public class DriveThruController {
 				}
 				rs_receiver.close();
 				st_receiver.close();
-				} catch(Exception e){
-					
+				} catch(SQLException e){
+					que_data.setSuccess(false);
+					que_data.setError(true);
+					que_data.setMessage("USP_DT_SearchReceiverPhone"+e.getMessage());
 				}finally{
-					ds.close();
+					//ds.close();
 				}
 			
 				ArrayList<String> listreceiver = new ArrayList<>();
@@ -1487,10 +1493,12 @@ public class DriveThruController {
 				}
 				rs_status.close();
 				st_status.close();
-				} catch(Exception e){
-					
+				} catch(SQLException e){
+					que_data.setSuccess(false);
+					que_data.setError(true);
+					que_data.setMessage("USP_DT_SearchQueueStatusHistory"+e.getMessage());
 				}finally{
-					ds.close();
+					//ds.close();
 				}
 				
 				evt.setStatus_for_saleorder_history(list_queuestatus);
@@ -1508,7 +1516,7 @@ public class DriveThruController {
 		}catch (SQLException e) {
 			que_data.setSuccess(false);
 			que_data.setError(true);
-			que_data.setMessage(e.getMessage());
+			que_data.setMessage("USP_DT_SearchListQueue"+e.getMessage());
 			
 			//System.out.println("error :"+list_so.get(0).getDoc_no());
 			
@@ -1600,7 +1608,7 @@ public class DriveThruController {
 				} catch(Exception e){
 					
 				}finally{
-					ds.close();
+					//ds.close();
 				}
 				
 
@@ -1945,7 +1953,6 @@ public class DriveThruController {
 				saleCode.setSaleName("");
 			}
 			
-			System.out.println("getQueue.getDelivery_type() = "+getQueue.getDelivery_type());
 			System.out.println("saleCode.getSaleName() = "+saleCode.getSaleName());
 			System.out.println("reqItem.getOtp_password() = "+reqItem.getOtp_password());
 			System.out.println("getQueue.getDelivery_type() = "+getQueue.getDelivery_type());
@@ -1959,8 +1966,6 @@ public class DriveThruController {
 						getQueue = getData.searchQueue(reqItem.getQueue_id());
 		
 						if (getQueue.getIsCancel()==0){
-							
-							if (getQueue.getIsCancel()==0){
 								
 							if (getQueue.getPickStatus()==1 && getQueue.getStatus() == 1 && getQueue.getDoctype() == 1){
 		
@@ -1976,16 +1981,18 @@ public class DriveThruController {
 										
 										checkItem = data.checkItemExistLoadProduct(reqItem.getQueue_id(), reqItem.getItem().get(n).getItem_barcode(), reqItem.getItem().get(n).getLine_number());
 										
+										System.out.println("Item  : "+getBarData.getCode() +"req_load"+reqItem.getItem().get(n).getQty_load()+" Remain"+checkItem.getQty_before());
 										if(reqItem.getItem().get(n).getQty_load() <= checkItem.getQty_before()){
 											
 											System.out.println("Pick Qty =" + checkItem.getQty_before());
-											vQuery = "update QItem set loadqty =loadQty+"+reqItem.getItem().get(n).getQty_load()+" where qId = "+ reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem().get(n).getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getItem().get(n).getLine_number();
+											vQuery = "update QItem set loadqty =loadQty+"+reqItem.getItem().get(n).getQty_load()+",sendSaleCode ='"+reqItem.getOtp_password()+"' where qId = "+ reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"' and itemCode='"+getBarData.getCode()+"' and barCode ='"+reqItem.getItem().get(n).getItem_barcode()+"' and unitCode ='"+getBarData.getUnitCode()+"' and lineNumber ="+reqItem.getItem().get(n).getLine_number();
 											System.out.println("vQuery LoadQty" + vQuery);
 											isSuccess= excecute.execute(dbName,vQuery);
 											
 											try {
 												Statement st_load = ds.getStatement(dbName);
 												QueryCheckLoad = "select count(itemcode) as countItemLoad from QItem where loadqty = 0 and qid = "+reqItem.getQueue_id()+" and docno ='"+getQueue.getDocNo()+"'";
+												System.out.println("QueryCheckLoad" + QueryCheckLoad);
 												ResultSet rs_load = st_load.executeQuery(QueryCheckLoad);
 												while(rs_load.next()){
 													checkCountUnLoad = rs_load.getInt("countItemLoad");
@@ -2002,11 +2009,11 @@ public class DriveThruController {
 												resItem.setMessage(e.getMessage());
 											} 
 											
-											if (checkCountUnLoad==0) {
-												vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
-												System.out.println("vQuery LoadQty" + vQuery);
-												isSuccess= excecute.execute(dbName,vQueryLoad);
-											}
+//											if (checkCountUnLoad==0) {
+//												vQueryLoad = "update Queue set isload = 1  where qId = "+reqItem.getQueue_id()+" and docNo ='"+getQueue.getDocNo()+"'";
+//												System.out.println("vQuery LoadQty" + vQuery);
+//												isSuccess= excecute.execute(dbName,vQueryLoad);
+//											}
 											
 												try{									
 														Statement st = ds.getStatement(dbName);
@@ -2088,13 +2095,6 @@ public class DriveThruController {
 							resItem.setItem(listproduct);
 							resItem.setSuccess(false);
 							resItem.setError(true);
-							resItem.setMessage("Queue is loaded");
-		
-						}
-						}else{
-							resItem.setItem(listproduct);
-							resItem.setSuccess(false);
-							resItem.setError(true);
 							resItem.setMessage("Queue is cancel");
 		
 						}
@@ -2129,6 +2129,10 @@ public class DriveThruController {
 	}
 	
 	public SO_Res_PickingManageProductBean ManageProductCheckOut(String dbName,SO_Req_CheckOutManageProductBean reqQueue){
+		DT_User_LoginBranchBean db = new DT_User_LoginBranchBean();
+		db.setDbName("bcnp");
+		db.setServerName("192.168.0.7"); 
+		
 		LoginBean userCode = new LoginBean();
 		getDataFromData getData = new getDataFromData();
 
@@ -2154,6 +2158,7 @@ public class DriveThruController {
 		double itemPrice=0.0;
 		double itemAmount=0.0;
 		double vQty=0.0;
+		boolean checkSOPrice;
 
 
 		userCode = getData.searchUserAccessToken(reqQueue.getAccess_token());
@@ -2162,6 +2167,11 @@ public class DriveThruController {
 
 		getBarData = getData.searchItemCode(reqQueue.getItem_barcode());
 		getQueue = getData.searchQueue(reqQueue.getQueue_id());
+		
+		if (getQueue.getDoctype()==1) {
+			checkSOPrice = getData.updateSaleOrderPriceRequestData(db, dbName, reqQueue.getQueue_id(), getQueue.getSaleOrder()); 
+		}
+		
 		userCode = getData.searchUserAccessToken(reqQueue.getAccess_token());
 
 		itemExist = getData.checkItemExistCheckOutProduct(reqQueue);
@@ -3088,9 +3098,13 @@ public class DriveThruController {
 				System.out.println("Status :"+req.getStatus_for_saleorder_current());
 				System.out.println("Password :"+req.getPassword());
 				System.out.println("getQueue password()="+getQueue.getOtp_password());
+				
+				
 				if (req.getStatus_for_saleorder_current().equals("1") && (req.getIs_loaded() == 0) && getQueue.getIsCancel() == 0){
 					System.out.println("IsLoad :"+req.getIs_loaded());
-					//if(req.getPassword()!=""){
+					
+					
+//					if(Load_Qty > 0){
 						//if(req.getPassword()==getQueue.getOtp_password()){
 							vQuery = "update Queue set status = 1,pickstatus=1 where qid = "+req.getQueue_id()+" and docdate = curdate()";
 							System.out.println(vQuery);
@@ -3128,12 +3142,12 @@ public class DriveThruController {
 							//change.setSuccess(false);
 							//change.setError(true);
 							//change.setMessage("Otp password is incorrect");
-						//}
-					//}else{
-						//change.setSuccess(false);
-						//change.setError(true);
-						//change.setMessage("Not have otp password");
-					//}
+//						//}
+//					}else{
+//						change.setSuccess(false);
+//						change.setError(true);
+//						change.setMessage("Queue Not Have Item Load");
+//					}
 				}//else{
 					//à§×èÍ¹ä¢¼Ô´
 					//change.setSuccess(false);
@@ -3142,11 +3156,35 @@ public class DriveThruController {
 				//}
 				
 				
-				if (req.getStatus_for_saleorder_current().equals("1") && req.getIs_loaded() == 1 && req.getPassword() != ""  && getQueue.getIsCancel() == 0){
+				if (req.getStatus_for_saleorder_current().equals("1") && req.getIs_loaded() == 1 && getQueue.getIsCancel() == 0){
 					System.out.println("IsLoad :"+req.getIs_loaded());
 					System.out.println("Password :"+req.getPassword());
 					System.out.println("Pass Hash :"+getQueue.getOtp_password());
-					//if(req.getPassword()!=""){
+					
+					String vQuery_CheckLoad="";
+					int Load_Qty=0;
+					
+					try {
+			            Statement st = this.ds.getStatement("SmartQ");
+			            vQuery_CheckLoad = "select count(itemCode) as vCount from QItem where qId = "+ req.getQueue_id()+" and docDate = CURDATE() and loadQty <> 0 and isCancel = 0 ";
+			            System.out.println("vQuery_CheckLoad :" + vQuery_CheckLoad);
+			            ResultSet rs = st.executeQuery(vQuery_CheckLoad);
+
+			            while(rs.next()) {
+			            	Load_Qty = rs.getInt("vCount");
+			            }
+
+			            rs.close();
+			            st.close();
+			        } catch (Exception var7) {
+			            var7.printStackTrace();
+			        } finally {
+			            this.ds.close();
+			        }
+					
+					System.out.println("Load_Qty= "+Load_Qty);
+					
+					if(Load_Qty>0){
 					
 					//bcrypt.checkPassword(req.getPassword(), getQueue.getOtp_password());
 					//String checkOtp = bcrypt.checkPassword(req.getPassword(), getQueue.getOtp_password())? "Passwords Match" : "Passwords do not match";
@@ -3156,7 +3194,7 @@ public class DriveThruController {
 					
 					System.out.println(""+getQueue.getDelivery_type()+",,,,"+saleCode.getSaleName()+",,,,"+req.getPassword()+",,,,"+getQueue.getOtp_password());
 					
-						if ((getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals(""))|| (req.getPassword().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)){//(checkOtp.equals("Passwords Match")){//req.getPassword().equals(getQueue.getOtp_password())
+						//if ((getQueue.getDelivery_type()==1 && !saleCode.getSaleName().equals(""))){//|| (req.getPassword().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)){//(checkOtp.equals("Passwords Match")){//req.getPassword().equals(getQueue.getOtp_password())
 							vQuery = "update Queue set status = 1,pickstatus=1,isload =1 ,confirmcode = '"+creatorCode+"',confirmdate = CURRENT_TIMESTAMP() where qid = "+req.getQueue_id()+" and docdate = curdate()";
 							System.out.println(vQuery);
 							isSuccess= excecute.execute(dbName,vQuery);
@@ -3198,7 +3236,7 @@ public class DriveThruController {
 						}else{
 							change.setSuccess(false);
 							change.setError(true);
-							change.setMessage("Otp password is incorrect");
+							change.setMessage("Queue Not Have Item Load");
 						}
 					//}else{
 						//change.setSuccess(false);
@@ -3551,6 +3589,7 @@ public class DriveThruController {
 		int vCountToken = 0;
 
 		PosPoint = "13";
+		//PosPoint = "15";
 
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
 		getQueue = getData.searchQueue(reqsBill.getQueue_id());
@@ -4802,9 +4841,17 @@ public class DriveThruController {
 										System.out.println("Database = "+db.getDbName());
 										
 										isSuccess = npExec.executeSql(db.getServerName(),db.getDbName(), vQuery);
+										
+										String vBookCode="";
+										
+										if (bill.getBillHeader().getBillType()==0) {
+											vBookCode="41";
+										}else {
+												vBookCode="20";
+										}
 
 										
-										vQueryTax = "exec dbo.USP_API_InsertOutPutTax "+bill.getBillHeader().getBillType()+",'"+bill.getBillHeader().getDocNo()+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocNo()+"','"+bill.getBillHeader().getArCode()+"',"+bill.getBillHeader().getBeforeTaxAmount()+","+bill.getBillHeader().getTaxAmount()+",'"+userCode.getEmployeeCode()+"'";
+										vQueryTax = "exec dbo.USP_API_InsertOutPutTax '"+bill.getBillHeader().getDocNo()+"','"+vBookCode+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocDate()+"','"+bill.getBillHeader().getDocNo()+"','"+bill.getBillHeader().getArCode()+"',"+bill.getBillHeader().getBeforeTaxAmount()+","+bill.getBillHeader().getTaxAmount()+",'"+userCode.getEmployeeCode()+"'";
 										isSuccess = npExec.executeSql(db.getServerName(),db.getDbName(), vQueryTax);
 
 										System.out.println("InvoiceSub :"+sub.size());

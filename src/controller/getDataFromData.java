@@ -497,7 +497,7 @@ public class getDataFromData {
 
         try {
             Statement st = this.ds.getStatement("SmartQ");
-            this.vQuery = "select sum(checkoutqty*price) as totalamount from Queue a inner join QItem b on a.qid = b.qid and a.docno = b.docno  where a.qId = " + qId + " and a.docdate = CURDATE() and a.iscancel = 0 and b.iscancel = 0 and b.isCheckOut = 1 ";
+            this.vQuery = "select ROUND(sum(checkoutqty*price), 2)  as totalamount from Queue a inner join QItem b on a.qid = b.qid and a.docno = b.docno  where a.qId = " + qId + " and a.docdate = CURDATE() and a.iscancel = 0 and b.iscancel = 0 and b.isCheckOut = 1 ";
             System.out.println("GetDocno :" + this.vQuery);
 
             ResultSet rs;
@@ -764,7 +764,7 @@ public class getDataFromData {
         try {
             Statement st = this.ds.getStatement("SmartQ");
             this.vQuery = "call USP_DT_CheckItemSOData (" + que_id + ",'" + getItemCode.getCode() + "'," +line_number + ") ";
-            System.out.println("ExistQueue :" + this.vQuery);
+            System.out.println("Check Item Load :" + this.vQuery);
             ResultSet rs = st.executeQuery(this.vQuery);
 
             while(rs.next()) {
@@ -805,10 +805,12 @@ public class getDataFromData {
         int vExist = 0;
         SO_Res_CheckQueueItemBean itemexist = new SO_Res_CheckQueueItemBean();
         PK_Resp_GetItemBarcodeBean getItemCode = this.searchItemCode(reqItem.getItem_barcode());
+        
+        
 
         try {
             Statement st = this.ds.getStatement("SmartQ");
-            this.vQuery = "call USP_DT_CheckItemExist ('" + reqItem.getQueue_id() + "','" + getItemCode.getCode() + "','" + getItemCode.getUnitCode() + "') ";
+            this.vQuery = "call USP_DT_CheckItemExistCheckOut ('" + reqItem.getQueue_id() + "','" + getItemCode.getCode() + "','" + getItemCode.getUnitCode() + "') ";
             System.out.println("ExistQueue :" + this.vQuery);
             ResultSet rs = st.executeQuery(this.vQuery);
 
@@ -1089,13 +1091,16 @@ public class getDataFromData {
                 System.out.println("carditcard No :" + ((SO_Reqs_CreditCardBean)crdCard.get(x)).getCard_no());
 
                 for(int d = 0; d < crdCard.size(); ++d) {
+                	
                     if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getBank_code().equals(((SO_Reqs_CreditCardBean)crdCard.get(d)).getBank_code()) && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getCard_no().equals(((SO_Reqs_CreditCardBean)crdCard.get(d)).getCard_no()) && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getConfirm_no().equals(((SO_Reqs_CreditCardBean)crdCard.get(d)).getConfirm_no())) {
                         ++checkdulpicate;
                     }
                 }
 
+                System.out.println("checkdulpicate = "+checkdulpicate);
+                
                 if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getCard_no() != "" && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getCard_no() != null) {
-                    if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getAmount() != 0.0D && checkdulpicate <= 1) {
+                	if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getAmount() != 0.0 && checkdulpicate <= crdCard.size()) {
                         if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getBank_code() != "" && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getBank_code() != null) {
                             if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getConfirm_no() != "" && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getConfirm_no() != null) {
                                 if (((SO_Reqs_CreditCardBean)crdCard.get(x)).getCredit_type() != "" && ((SO_Reqs_CreditCardBean)crdCard.get(x)).getCredit_type() != null) {
@@ -1103,7 +1108,7 @@ public class getDataFromData {
                                         Statement st = this.npDS.getSqlStatementBranch(this.connData);
                                         this.vQuery = "exec dbo.USP_DT_ValidateCreditCard '" + ((SO_Reqs_CreditCardBean)crdCard.get(x)).getCard_no() + "','" + ((SO_Reqs_CreditCardBean)crdCard.get(x)).getConfirm_no() + "'";
                                         ResultSet rs = st.executeQuery(this.vQuery);
-                                        System.out.println("Verify Coupong :" + this.vQuery);
+                                        System.out.println("Verify CreditCard :" + this.vQuery);
 
                                         while(rs.next()) {
                                             isUsed = rs.getInt("vCount");
@@ -1422,10 +1427,24 @@ public class getDataFromData {
     public CT_Resp_ResponseBean verifyDeposit(String serverName, String dataBaseName, String ar_code, List<IV_Req_DepositBean> deposit) {
         int counterr = 0;
         int checkexist = 0;
+        
         if (deposit.size() != 0) {
             for(int z = 0; z < deposit.size(); ++z) {
+            	int checkdepduplicate = 0; 
                 if (((IV_Req_DepositBean)deposit.get(z)).getDeposit_id() != "" && ((IV_Req_DepositBean)deposit.get(z)).getDeposit_id() != null) {
                     if (((IV_Req_DepositBean)deposit.get(z)).getAmount().doubleValue() != 0.0D) {
+                    	
+                    	for(int y = 0; y <deposit.size(); y++) {
+                    		 if (((IV_Req_DepositBean)deposit.get(z)).getDeposit_id().equals(((IV_Req_DepositBean)deposit.get(y)).getDeposit_id())) {
+                                 ++checkdepduplicate;
+                                 System.out.println("Deposit checkduplicate =" + checkdepduplicate);
+                    		 }
+                    	}
+                    	
+                    	if (checkdepduplicate <= 1) {
+                    		
+                    		System.out.println("DepositPass");
+                    		
                         try {
                             Statement st = this.sqlDS.getSqlStatement(serverName, dataBaseName);
                             this.vQuery = "set dateformat dmy select count(docno) as vCount from dbo.bcardeposit where arcode = '" + ar_code + "' and docno = '" + ((IV_Req_DepositBean)deposit.get(z)).getDeposit_id() + "' and billbalance >= " + ((IV_Req_DepositBean)deposit.get(z)).getAmount() + " and iscancel = 0";
@@ -1444,6 +1463,10 @@ public class getDataFromData {
                         } finally {
                             this.sqlDS.close();
                         }
+                        
+                    }else {
+                    	++counterr;
+                    }
                     } else {
                         ++counterr;
                     }
@@ -1655,9 +1678,48 @@ public class getDataFromData {
                 this.sale_item.setQty(rs.getDouble("qty"));
                 this.sale_item.setWh_code(rs.getString("whcode"));
                 this.sale_item.setShelf_code(rs.getString("shelfcode"));
+                this.sale_item.setItem_price(rs.getDouble("price"));
                 System.out.println("ItemCode = " + rs.getString("itemcode"));
-                this.vQuerySub = "update QItem set Qty=" + this.sale_item.getRemain_qty() + " where qid = " + qId + " and itemcode = '" + this.sale_item.getItem_code() + "' and unitcode = '" + this.sale_item.getUnit_code() + "' and whcode = '" + this.sale_item.getWh_code() + "' and shelfcode = '" + this.sale_item.getShelf_code() + "';";
+                
+                this.vQuerySub = "update QItem set Qty=" + this.sale_item.getRemain_qty() + ",price="+this.sale_item.getItem_price()+",itemAmount = (pickQty*"+this.sale_item.getItem_price()+") where qid = " + qId + " and itemcode = '" + this.sale_item.getItem_code() + "' and unitcode = '" + this.sale_item.getUnit_code() + "' and whcode = '" + this.sale_item.getWh_code() + "' and shelfcode = '" + this.sale_item.getShelf_code() + "';";
                 this.isSuccess = this.excecute.execute(dbName, this.vQuerySub);
+                
+                System.out.println("vQuerySub=" + this.vQuerySub);
+            }
+
+            rs.close();
+            stmt.close();
+            return true;
+        } catch (SQLException var10) {
+            ;
+        } finally {
+            this.ds.close();
+        }
+
+        return false;
+    }
+    
+    
+    public boolean updateSaleOrderPriceRequestData(DT_User_LoginBranchBean db, String dbName, int qId, String vSaleOrderNo) {
+        try {
+            Statement stmt = this.npDS.getSqlStatementBranch(db);
+            this.vQuery = "exec dbo.USP_NP_DataSaleOrderDriveThru '" + vSaleOrderNo + "'";
+            System.out.println(this.vQuery);
+            ResultSet rs = stmt.executeQuery(this.vQuery);
+
+            while(rs.next()) {
+                this.sale_item.setItem_code(rs.getString("itemcode"));
+                this.sale_item.setUnit_code(rs.getString("unitcode"));
+                this.sale_item.setRemain_qty(rs.getDouble("remainqty"));
+                this.sale_item.setQty(rs.getDouble("qty"));
+                this.sale_item.setWh_code(rs.getString("whcode"));
+                this.sale_item.setShelf_code(rs.getString("shelfcode"));
+                this.sale_item.setItem_price(rs.getDouble("price"));
+                System.out.println("ItemCode = " + rs.getString("itemcode"));
+                
+                this.vQuerySub = "update QItem set price="+this.sale_item.getItem_price()+",itemAmount = (pickQty*"+this.sale_item.getItem_price()+") where qid = " + qId + " and itemcode = '" + this.sale_item.getItem_code() + "' and unitcode = '" + this.sale_item.getUnit_code() + "' and whcode = '" + this.sale_item.getWh_code() + "' and shelfcode = '" + this.sale_item.getShelf_code() + "';";
+                this.isSuccess = this.excecute.execute(dbName, this.vQuerySub);
+                
                 System.out.println("vQuerySub=" + this.vQuerySub);
             }
 

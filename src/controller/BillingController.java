@@ -170,6 +170,7 @@ public class BillingController {
 		int vCountToken = 0;
 		
 		PosPoint = "13";
+		//PosPoint = "15";
 		
 		
 		if (qIdStatus.getStatus()==2){
