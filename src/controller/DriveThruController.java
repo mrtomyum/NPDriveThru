@@ -3700,7 +3700,6 @@ public class DriveThruController {
 				if(crdCard.size()!=0){
 
 					for(int a=0;a<crdCard.size();a++){
-
 						checkSumCreditAmount = checkSumCreditAmount+crdCard.get(a).getAmount();
 					}
 				}
@@ -4578,7 +4577,17 @@ public class DriveThruController {
 
 					double bfTaxAmount;
 
-					bfTaxAmount = (totalAmount*100)/107;
+					if (checkSumDepositAmount > 0) {
+						if (totalAmount-checkSumDepositAmount == 0) {
+							bfTaxAmount = 0;
+						} else {
+							bfTaxAmount = ((totalAmount-checkSumDepositAmount)*100)/107;
+						}
+						//bfTaxAmount = ((totalAmount-checkSumDepositAmount)*100)/107;
+					}else {
+						bfTaxAmount = (totalAmount*100)/107;
+					}
+					//bfTaxAmount = (totalAmount*100)/107;
 
 
 					BigDecimal newBeforeTaxAmount = new BigDecimal(bfTaxAmount);
@@ -4586,7 +4595,17 @@ public class DriveThruController {
 					changBFAmount = newBeforeTaxAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
 					beforeTaxAmount = changBFAmount.doubleValue();
 
-					taxAmount = totalAmount-beforeTaxAmount;
+					if (checkSumDepositAmount > 0) {
+						if (totalAmount-checkSumDepositAmount == 0) {
+							taxAmount = 0;
+						}else {
+							taxAmount = (totalAmount-checkSumDepositAmount)-beforeTaxAmount;
+						}
+						//taxAmount = (totalAmount-checkSumDepositAmount)-beforeTaxAmount;
+					}else {
+						taxAmount = totalAmount-beforeTaxAmount;
+					}
+					//taxAmount = totalAmount-beforeTaxAmount;
 
 
 					System.out.println("save ok"+validateCreditCard.getIsSuccess());
@@ -4632,21 +4651,52 @@ public class DriveThruController {
 										double inv_beforeTaxAmount=0;
 										double inv_taxAmount=0;
 										
-										if(qIdStatus.getTaxType()==0){
-											inv_beforeTaxAmount = beforeTaxAmount;
-											inv_taxAmount = taxAmount;
-											inv_totalAmount = totalAmount+taxAmount;
+										if (sumDepositAmount > 0 ) {
+											if(totalAmount-sumDepositAmount == 0) {
+												inv_beforeTaxAmount = 0;
+												inv_taxAmount = 0;
+												inv_totalAmount = 0;
+											}else {
+												if(qIdStatus.getTaxType()==0){
+													inv_beforeTaxAmount = beforeTaxAmount;
+													inv_taxAmount = taxAmount;
+													inv_totalAmount = (totalAmount-sumDepositAmount)+taxAmount;
+												}
+												if(qIdStatus.getTaxType()==1){
+													inv_beforeTaxAmount = beforeTaxAmount;
+													inv_taxAmount = taxAmount;
+													inv_totalAmount = totalAmount-sumDepositAmount;
+												}
+												if(qIdStatus.getTaxType()==2){
+													inv_beforeTaxAmount = beforeTaxAmount;
+													inv_taxAmount = 0;
+													inv_totalAmount = totalAmount-sumDepositAmount;
+												}
+											}
+											
+											
+										}else {
+											if(qIdStatus.getTaxType()==0){
+												inv_beforeTaxAmount = beforeTaxAmount;
+												inv_taxAmount = taxAmount;
+												inv_totalAmount = totalAmount+taxAmount;
+											}
+											if(qIdStatus.getTaxType()==1){
+												inv_beforeTaxAmount = beforeTaxAmount;
+												inv_taxAmount = taxAmount;
+												inv_totalAmount = totalAmount;
+											}
+											if(qIdStatus.getTaxType()==2){
+												inv_beforeTaxAmount = beforeTaxAmount;
+												inv_taxAmount = 0;
+												inv_totalAmount = totalAmount;
+											}	
 										}
-										if(qIdStatus.getTaxType()==1){
-											inv_beforeTaxAmount = beforeTaxAmount;
-											inv_taxAmount = taxAmount;
-											inv_totalAmount = totalAmount;
-										}
-										if(qIdStatus.getTaxType()==2){
-											inv_beforeTaxAmount = beforeTaxAmount;
-											inv_taxAmount = 0;
-											inv_totalAmount = totalAmount;
-										}
+										
+										
+										
+										
+
 
 										header.setDocNo(vPosNo);
 										header.setDocDate(dateFormat.format(dateNow));
