@@ -11,6 +11,7 @@ public class SO_Req_BillingBean {
     private int confirm;
     private int queue_id;
     private double cash;
+    private String scg_id;
     private List<SO_Reqs_CreditCardBean> credit_card;
     private List<SO_Reqs_CouponBean> coupon_code;
     private List<IV_Req_DepositBean> deposit_amount;
@@ -22,11 +23,8 @@ public class SO_Req_BillingBean {
 		// TODO Auto-generated constructor stub
 	}
 
-
-	public SO_Req_BillingBean(String access_token, String ar_code, int confirm,
-			int queue_id, double cash,
-			List<SO_Reqs_CreditCardBean> credit_card,
-			List<SO_Reqs_CouponBean> coupon_code,
+	public SO_Req_BillingBean(String access_token, String ar_code, int confirm, int queue_id, double cash,
+			String scg_id, List<SO_Reqs_CreditCardBean> credit_card, List<SO_Reqs_CouponBean> coupon_code,
 			List<IV_Req_DepositBean> deposit_amount) {
 		super();
 		this.access_token = access_token;
@@ -34,10 +32,10 @@ public class SO_Req_BillingBean {
 		this.confirm = confirm;
 		this.queue_id = queue_id;
 		this.cash = cash;
+		this.scg_id = scg_id;
 		this.credit_card = credit_card;
 		this.coupon_code = coupon_code;
 		this.deposit_amount = deposit_amount;
-		//this.debt_amount = debt_amount;
 	}
 
 
@@ -91,6 +89,16 @@ public class SO_Req_BillingBean {
 	}
 
 
+	public String getScg_id() {
+		return scg_id;
+	}
+
+
+	public void setScg_id(String scg_id) {
+		this.scg_id = scg_id;
+	}
+
+
 	public List<SO_Reqs_CreditCardBean> getCredit_card() {
 		return credit_card;
 	}
@@ -119,6 +127,9 @@ public class SO_Req_BillingBean {
 	public void setDeposit_amount(List<IV_Req_DepositBean> deposit_amount) {
 		this.deposit_amount = deposit_amount;
 	}
+
+
+	
 
 
 //	public double getDebt_amount() {

@@ -1079,7 +1079,8 @@ public class DriveThruController {
 							List<SO_Res_ListProductQueueBean>list_item = new ArrayList<SO_Res_ListProductQueueBean>();
 
 							Statement st_item = ds.getStatement(dbName);
-							vQuery = "call USP_DT_SearchQueueProduct ("+rsq.getInt("qid")+")";
+							////////////////vQuery = "call USP_DT_SearchQueueProduct ("+rsq.getInt("qid")+")";
+							vQuery = "call USP_DT_SearchQueueProduct_CutLoad ("+rsq.getInt("qid")+")";
 							ResultSet rs_item = st_item.executeQuery(vQuery);
 							System.out.println(vQuery);
 
@@ -1334,7 +1335,8 @@ public class DriveThruController {
 
 
 				Statement st_item = ds.getStatement(dbName);
-				vQuery = "call USP_DT_SearchQueueProduct ("+rs.getInt("qid")+")";
+				//////////////vQuery = "call USP_DT_SearchQueueProduct ("+rs.getInt("qid")+")";/////////////////////////////////
+				vQuery = "call USP_DT_SearchQueueProduct_CutLoad ("+rs.getInt("qid")+")";
 				ResultSet rs_item = st_item.executeQuery(vQuery);
 				System.out.println(vQuery);
 				
@@ -1372,7 +1374,7 @@ public class DriveThruController {
 				} catch(SQLException e){
 					que_data.setSuccess(false);
 					que_data.setError(true);
-					que_data.setMessage("USP_DT_SearchQueueProduct"+e.getMessage());
+					que_data.setMessage("SearchQueueProduct"+e.getMessage());
 				}finally{
 					//ds.close();	
 				}
@@ -2246,7 +2248,9 @@ public class DriveThruController {
 									System.out.println("reqQueue.getQty_after = "+reqQueue.getQty_after());
 									System.out.println("itemExist.getQty_before ="+itemExist.getQty_before());
 									System.out.println("itemExist.getItem_source ="+itemExist.getItem_source());
-									if((itemExist.getItem_source()==0)||(itemExist.getItem_source()==1 && itemExist.getQty_before() > 0 && reqQueue.getQty_after()==itemExist.getQty_before() && itemExist.getBill_type() == 1) || (itemExist.getItem_source()==1 &&  itemExist.getQty_before() > 0 && itemExist.getBill_type()==0)){
+									System.out.println("itemExist.getBill_type() ="+itemExist.getBill_type());
+									
+									if((itemExist.getItem_source()==0)||(itemExist.getItem_source()==1 && itemExist.getBill_type() == 1 && reqQueue.getQty_after()==itemExist.getQty_before()) || (itemExist.getItem_source()==1 && itemExist.getBill_type()==0)){
 										System.out.println("1");
 										if(reqQueue.getIs_cancel()==0){
 											System.out.println("2");
@@ -2857,8 +2861,12 @@ public class DriveThruController {
 													}
 													rs_owner.close();
 													st_owner.close();
-													}catch(Exception e){}
-													finally{ds.close();}
+													}catch(Exception e){
+														
+													}
+													finally{
+														//ds.close();
+													}
 
 													ArrayList<String> listowner = new ArrayList<>();
 													for(int i=0;i<list_ownerphone.size();i++){
@@ -2895,7 +2903,9 @@ public class DriveThruController {
 													rs_receiver.close();
 													st_receiver.close();
 													}catch(Exception e){}
-													finally{ds.close();}
+													finally{
+														//ds.close();
+													}
 
 													ArrayList<String> listreceiver = new ArrayList<>();
 													for(int i=0;i<list_receiverphone.size();i++){
@@ -2935,7 +2945,9 @@ public class DriveThruController {
 													rs_status.close();
 													st_status.close();
 													}catch(Exception e){}
-													finally{ds.close();}
+													finally{
+														//ds.close();
+													}
 
 													queuedata.setStatus_for_saleorder_history(list_queuestatus);
 
@@ -3441,7 +3453,9 @@ public class DriveThruController {
 					rs_owner.close();
 					st_owner.close();
 					}catch(Exception e){}
-					finally{ds.close();}
+					finally{
+						//ds.close();
+					}
 				
 					ArrayList<String> listowner = new ArrayList<>();
 					for(int i=0;i<list_ownerphone.size();i++){
@@ -3478,7 +3492,9 @@ public class DriveThruController {
 					rs_receiver.close();
 					st_receiver.close();
 					}catch(Exception e){}
-					finally{ds.close();}
+					finally{
+						//ds.close();
+					}
 				
 					ArrayList<String> listreceiver = new ArrayList<>();
 					for(int i=0;i<list_receiverphone.size();i++){
@@ -3518,7 +3534,9 @@ public class DriveThruController {
 					rs_status.close();
 					st_status.close();
 					}catch(Exception e){}
-					finally{ds.close();}
+					finally{
+						//ds.close();
+					}
 					
 					queuedata.setStatus_for_saleorder_history(list_queuestatus);
 

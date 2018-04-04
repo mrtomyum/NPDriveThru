@@ -14,6 +14,7 @@ public class PK_Reqs_EditOrderBean {
 	private int qId;
 	private int status;
 	private String saleCode;
+	private String password;
 	
 //	private String access_token;
 //	private int queue_id;
@@ -29,64 +30,74 @@ public class PK_Reqs_EditOrderBean {
 		// TODO Auto-generated constructor stub
 	}
 
-public PK_Reqs_EditOrderBean(String access_token, String carNumber, String carBrand, int qId, int status,
-		String saleCode) {
-	super();
-	this.access_token = access_token;
-	this.carNumber = carNumber;
-	this.carBrand = carBrand;
-	this.qId = qId;
-	this.status = status;
-	this.saleCode = saleCode;
-}
+	public PK_Reqs_EditOrderBean(String access_token, String carNumber, String carBrand, int qId, int status,
+			String saleCode, String password) {
+		super();
+		this.access_token = access_token;
+		this.carNumber = carNumber;
+		this.carBrand = carBrand;
+		this.qId = qId;
+		this.status = status;
+		this.saleCode = saleCode;
+		this.password = password;
+	}
 
-public String getAccess_token() {
-	return access_token;
-}
+	public String getAccess_token() {
+		return access_token;
+	}
 
-public void setAccess_token(String access_token) {
-	this.access_token = access_token;
-}
+	public void setAccess_token(String access_token) {
+		this.access_token = access_token;
+	}
 
-public String getCarNumber() {
-	return carNumber;
-}
+	public String getCarNumber() {
+		return carNumber;
+	}
 
-public void setCarNumber(String carNumber) {
-	this.carNumber = carNumber;
-}
+	public void setCarNumber(String carNumber) {
+		this.carNumber = carNumber;
+	}
 
-public String getCarBrand() {
-	return carBrand;
-}
+	public String getCarBrand() {
+		return carBrand;
+	}
 
-public void setCarBrand(String carBrand) {
-	this.carBrand = carBrand;
-}
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
 
-public int getqId() {
-	return qId;
-}
+	public int getqId() {
+		return qId;
+	}
 
-public void setqId(int qId) {
-	this.qId = qId;
-}
+	public void setqId(int qId) {
+		this.qId = qId;
+	}
 
-public int getStatus() {
-	return status;
-}
+	public int getStatus() {
+		return status;
+	}
 
-public void setStatus(int status) {
-	this.status = status;
-}
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
-public String getSaleCode() {
-	return saleCode;
-}
+	public String getSaleCode() {
+		return saleCode;
+	}
 
-public void setSaleCode(String saleCode) {
-	this.saleCode = saleCode;
-}
+	public void setSaleCode(String saleCode) {
+		this.saleCode = saleCode;
+	}
 
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
 
 }

@@ -373,6 +373,7 @@ public class PickupController {
 	public PK_Resp_EditOrderBean  editOrder(String dbName,PK_Reqs_EditOrderBean reqEdit){
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
 		getDataFromData getData = new getDataFromData();
+		PK_Resp_SaleCodeDetails saleCodePass = new PK_Resp_SaleCodeDetails();
 		
 		dtDoc.applyPattern("yyyy-MM-dd");
 		dt.applyPattern("yyyy-MM-dd HH:mm:ss.S");
@@ -397,6 +398,17 @@ public class PickupController {
 					System.out.println("รหัสพนักงานคือ "+reqEdit.getSaleCode());
 					
 					creatorCode = userCode.getEmployeeCode();
+					
+					getQueue = getData.searchQueue(reqEdit.getqId());
+					
+					if(getQueue.getDelivery_type() == 1) {
+						saleCodePass = getData.searchSaleCode(reqEdit.getPassword());
+					}else {
+						saleCodePass.setSaleCode("");
+						saleCodePass.setSaleName("");
+					}
+					
+					if((getQueue.getDoctype() == 0)||(((getQueue.getDoctype() == 1 && getQueue.getDelivery_type()==1 && !saleCodePass.getSaleName().equals(""))|| (getQueue.getDoctype() == 1 && reqEdit.getPassword().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)))) {
 					
 					if (reqEdit.getSaleCode()=="" || reqEdit.getSaleCode() == null){
 						saleCode = userCode.getEmployeeCode();
@@ -450,6 +462,9 @@ public class PickupController {
 						}	finally{
 							ds.close();
 						}
+				}else {
+						
+					}
 				}else{
 					isSuccess=false;
 					response.setIsSuccess(false);
