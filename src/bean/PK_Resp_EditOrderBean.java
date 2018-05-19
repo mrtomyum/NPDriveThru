@@ -3,25 +3,67 @@ package bean;
 import bean.response.CT_Resp_ResponseBean;
 
 public class PK_Resp_EditOrderBean {
-	private CT_Resp_ResponseBean response;
-
+	boolean success;
+	boolean error;
+	String message;
+	
 	public PK_Resp_EditOrderBean() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public PK_Resp_EditOrderBean(CT_Resp_ResponseBean response) {
+	public PK_Resp_EditOrderBean(boolean success, boolean error, String message) {
 		super();
-		this.response = response;
+		this.success = success;
+		this.error = error;
+		this.message = message;
 	}
 
-	public CT_Resp_ResponseBean getResponse() {
-		return response;
+	public boolean isSuccess() {
+		return success;
 	}
 
-	public void setResponse(CT_Resp_ResponseBean response) {
-		this.response = response;
+	public void setSuccess(boolean success) {
+		this.success = success;
 	}
+
+	public boolean isError() {
+		return error;
+	}
+
+	public void setError(boolean error) {
+		this.error = error;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+	
+//	
+//	private CT_Resp_ResponseBean response;
+//
+//	public PK_Resp_EditOrderBean() {
+//		super();
+//		// TODO Auto-generated constructor stub
+//	}
+//
+//	public PK_Resp_EditOrderBean(CT_Resp_ResponseBean response) {
+//		super();
+//		this.response = response;
+//	}
+//
+//	public CT_Resp_ResponseBean getResponse() {
+//		return response;
+//	}
+//
+//	public void setResponse(CT_Resp_ResponseBean response) {
+//		this.response = response;
+//	}
 	
 	
 }

@@ -14,7 +14,68 @@ public class PK_Reqs_EditOrderBean {
 	private int qId;
 	private int status;
 	private String saleCode;
-	private String password;
+	private String otp_password;
+	
+	
+	public PK_Reqs_EditOrderBean() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+	public PK_Reqs_EditOrderBean(String access_token, String carNumber, String carBrand, int qId, int status,
+			String saleCode, String otp_password) {
+		super();
+		this.access_token = access_token;
+		this.carNumber = carNumber;
+		this.carBrand = carBrand;
+		this.qId = qId;
+		this.status = status;
+		this.saleCode = saleCode;
+		this.otp_password = otp_password;
+	}
+	public String getAccess_token() {
+		return access_token;
+	}
+	public void setAccess_token(String access_token) {
+		this.access_token = access_token;
+	}
+	public String getCarNumber() {
+		return carNumber;
+	}
+	public void setCarNumber(String carNumber) {
+		this.carNumber = carNumber;
+	}
+	public String getCarBrand() {
+		return carBrand;
+	}
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
+	public int getqId() {
+		return qId;
+	}
+	public void setqId(int qId) {
+		this.qId = qId;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	public String getSaleCode() {
+		return saleCode;
+	}
+	public void setSaleCode(String saleCode) {
+		this.saleCode = saleCode;
+	}
+	public String getOtp_password() {
+		return otp_password;
+	}
+	public void setOtp_password(String otp_password) {
+		this.otp_password = otp_password;
+	}
 	
 //	private String access_token;
 //	private int queue_id;
@@ -25,78 +86,6 @@ public class PK_Reqs_EditOrderBean {
 
 	
 	
-	public PK_Reqs_EditOrderBean() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public PK_Reqs_EditOrderBean(String access_token, String carNumber, String carBrand, int qId, int status,
-			String saleCode, String password) {
-		super();
-		this.access_token = access_token;
-		this.carNumber = carNumber;
-		this.carBrand = carBrand;
-		this.qId = qId;
-		this.status = status;
-		this.saleCode = saleCode;
-		this.password = password;
-	}
-
-	public String getAccess_token() {
-		return access_token;
-	}
-
-	public void setAccess_token(String access_token) {
-		this.access_token = access_token;
-	}
-
-	public String getCarNumber() {
-		return carNumber;
-	}
-
-	public void setCarNumber(String carNumber) {
-		this.carNumber = carNumber;
-	}
-
-	public String getCarBrand() {
-		return carBrand;
-	}
-
-	public void setCarBrand(String carBrand) {
-		this.carBrand = carBrand;
-	}
-
-	public int getqId() {
-		return qId;
-	}
-
-	public void setqId(int qId) {
-		this.qId = qId;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	public String getSaleCode() {
-		return saleCode;
-	}
-
-	public void setSaleCode(String saleCode) {
-		this.saleCode = saleCode;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
 	
 	
 

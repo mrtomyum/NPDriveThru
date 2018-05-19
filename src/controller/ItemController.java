@@ -403,7 +403,6 @@ public class ItemController {
 		
 	}
 	
-
 	public ApiItemEditBean itemEdit(String dbName,ReqItemEditBean reqItemEdit)
 	{
 		java.text.SimpleDateFormat dt= new java.text.SimpleDateFormat();
@@ -464,8 +463,8 @@ public class ItemController {
 				
 		    	BufferedImage image = null;
 		        try {
-		        	System.out.println("getFilePath = "+reqItemEdit.getFilePath());
-		        	System.out.println("getImage_filename = "+reqItemEdit.getImage_filename());
+		        	//System.out.println("getFilePath = "+reqItemEdit.getFilePath());
+		        	//System.out.println("getImage_filename = "+reqItemEdit.getImage_filename());
 		        	
 		            if(fileName.length() > 0){
 						filePathTo = filePathTo+fileName;

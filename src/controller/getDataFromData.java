@@ -810,7 +810,8 @@ public class getDataFromData {
 
         try {
             Statement st = this.ds.getStatement("SmartQ");
-            this.vQuery = "call USP_DT_CheckItemExistCheckOut ('" + reqItem.getQueue_id() + "','" + getItemCode.getCode() + "','" + getItemCode.getUnitCode() + "') ";
+            //this.vQuery = "call USP_DT_CheckItemExistCheckOut ('" + reqItem.getQueue_id() + "','" + getItemCode.getCode() + "','" + getItemCode.getUnitCode() + "') ";
+            this.vQuery = "call USP_DT_CheckItemExistCheckOut_CutLoad ('" + reqItem.getQueue_id() + "','" + getItemCode.getCode() + "','" + getItemCode.getUnitCode() + "') ";
             System.out.println("ExistQueue :" + this.vQuery);
             ResultSet rs = st.executeQuery(this.vQuery);
 
@@ -2269,13 +2270,13 @@ public class getDataFromData {
 
 							itemPrice = rs_sub.getDouble("price");
 
-							if (saleCode == "" || saleCode == null) {
-								saleCode = userCode.getEmployeeCode();//lastSale.getSaleCode();
-								saleName = userCode.getEmployeeName();//lastSale.getSaleName();
+							//if (saleCode == "" || saleCode == null || saleCode.equals("")) {
+							saleCode = userCode.getEmployeeCode();//lastSale.getSaleCode();
+							saleName = userCode.getEmployeeName();//lastSale.getSaleName();
 
-								System.out.println("No Have SaleCode");
+							//System.out.println("No Have SaleCode");
 
-							}
+							//}
 
 							itemAmount = remainQty*itemPrice;
 

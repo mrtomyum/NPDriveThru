@@ -215,7 +215,6 @@ public class DriveThru {
 		return manageproduct;
 	}
 	
-	
 	@POST
 	@Path("/load/manage_product/")//7.pickup manage product
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -242,7 +241,6 @@ public class DriveThru {
 		return manageproduct;
 	}
 	
-	
 	@POST
 	@Path("/queue/edit/")//9.edit queue
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -255,7 +253,6 @@ public class DriveThru {
 		edit = ctl.editOrder("SmartQ", req);
 		return edit;
 	}
-	
 	
 	@POST
 	@Path("/saleorder/edit/")//10.edit saleorder
@@ -275,7 +272,6 @@ public class DriveThru {
 		return edit;
 	}
 	
-	
 	@POST
 	@Path("/queue/status/")//11.change status
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -293,7 +289,6 @@ public class DriveThru {
 		return change;
 	}
 	
-	
 	@POST
 	@Path("/pickup/delete/")//11.cancel queue
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -306,7 +301,6 @@ public class DriveThru {
 		cancel = ctl.CancelQueueDriveThru("SmartQ", req);
 		return cancel;
 	}
-	
 	
 	@POST
 	@Path("/billing/deposit_amount/")//12.list ar deposit

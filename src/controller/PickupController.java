@@ -369,7 +369,7 @@ public class PickupController {
 		return qIdOrder;
 	}
 	
-	
+	//otp_password
 	public PK_Resp_EditOrderBean  editOrder(String dbName,PK_Reqs_EditOrderBean reqEdit){
 		PK_Resp_GetDataQueue getQueue = new PK_Resp_GetDataQueue();
 		getDataFromData getData = new getDataFromData();
@@ -402,13 +402,13 @@ public class PickupController {
 					getQueue = getData.searchQueue(reqEdit.getqId());
 					
 					if(getQueue.getDelivery_type() == 1) {
-						saleCodePass = getData.searchSaleCode(reqEdit.getPassword());
+						saleCodePass = getData.searchSaleCode(reqEdit.getOtp_password());
 					}else {
 						saleCodePass.setSaleCode("");
 						saleCodePass.setSaleName("");
 					}
 					
-					if((getQueue.getDoctype() == 0)||(((getQueue.getDoctype() == 1 && getQueue.getDelivery_type()==1 && !saleCodePass.getSaleName().equals(""))|| (getQueue.getDoctype() == 1 && reqEdit.getPassword().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)))) {
+					if((getQueue.getDoctype() == 0)||(((getQueue.getDoctype() == 1 && getQueue.getDelivery_type()==1 && !saleCodePass.getSaleName().equals(""))|| (getQueue.getDoctype() == 1 && reqEdit.getOtp_password().equals(getQueue.getOtp_password()) && getQueue.getDelivery_type() == 0)))) {
 					
 					if (reqEdit.getSaleCode()=="" || reqEdit.getSaleCode() == null){
 						saleCode = userCode.getEmployeeCode();
@@ -448,29 +448,54 @@ public class PickupController {
 					System.out.println(vQuery); 
 					try {
 							isSuccess= excecute.execute(dbName,vQuery);
-							response.setIsSuccess(true);
-							response.setProcess("editPickup");
-							response.setProcessDesc("Successfull");
-							editOrder.setResponse(response);
+//							response.setIsSuccess(true);
+//							response.setProcess("editPickup");
+//							response.setProcessDesc("Successfull");
+							
+							editOrder.setSuccess(true);
+							editOrder.setError(false);
+							editOrder.setMessage("");
+							
+							//editOrder.setResponse(response);
+							
 							
 						} catch (Exception e) {
 							isSuccess=false;
 							response.setIsSuccess(false);
 							response.setProcess("editPickup");
 							response.setProcessDesc("Error : "+e.getMessage());
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(false);
+							editOrder.setError(true);
+							editOrder.setMessage("Error : "+e.getMessage());
+							
+							//editOrder.setResponse(response);
 						}	finally{
 							ds.close();
 						}
 				}else {
-						
+					isSuccess=false;
+					response.setIsSuccess(false);
+					response.setProcess("editPickup");
+					response.setProcessDesc("Error : Otp Password is wrong");
+					
+					editOrder.setSuccess(false);
+					editOrder.setError(true);
+					editOrder.setMessage("Error : Otp Password is wrong");
+					
+					//editOrder.setResponse(response);
 					}
 				}else{
 					isSuccess=false;
 					response.setIsSuccess(false);
 					response.setProcess("editPickup");
 					response.setProcessDesc("Error : Queue status is used");
-					editOrder.setResponse(response);
+					
+					editOrder.setSuccess(false);
+					editOrder.setError(true);
+					editOrder.setMessage("Error : Queue status is used");
+					
+					//editOrder.setResponse(response);
 				}
 
 			}else{
@@ -478,7 +503,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("editPickup");
 				response.setProcessDesc("Error : Queue is cancel");
-				editOrder.setResponse(response);			
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : Queue is cancel");
+				
+				//editOrder.setResponse(response);			
 			}
 			
 			}else{
@@ -486,7 +516,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("editPickup");
 				response.setProcessDesc("Error : No Have CarLicence");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : No Have CarLicence");
+				
+				//editOrder.setResponse(response);
 			}
 		
 		
@@ -563,14 +598,24 @@ public class PickupController {
 							response.setIsSuccess(true);
 							response.setProcess("editPickup");
 							response.setProcessDesc("Successfull");
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(true);
+							editOrder.setError(false);
+							editOrder.setMessage("");
+							
+							//editOrder.setResponse(response);
 							
 						} catch (Exception e) {
 							isSuccess=false;
 							response.setIsSuccess(false);
 							response.setProcess("editPickup");
 							response.setProcessDesc("Error : "+e.getMessage());
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(false);
+							editOrder.setError(true);
+							editOrder.setMessage("Error : "+e.getMessage());
+							
+							//editOrder.setResponse(response);
 						}	finally{
 							ds.close();
 						}
@@ -579,7 +624,12 @@ public class PickupController {
 					response.setIsSuccess(false);
 					response.setProcess("editPickup");
 					response.setProcessDesc("Error : Queue status is used");
-					editOrder.setResponse(response);
+					
+					editOrder.setSuccess(false);
+					editOrder.setError(true);
+					editOrder.setMessage("Error : Queue status is used");
+					
+					//editOrder.setResponse(response);
 				}
 
 			}else{
@@ -587,7 +637,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("editPickup");
 				response.setProcessDesc("Error : Queue is cancel");
-				editOrder.setResponse(response);			
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : Queue is cancel");
+				
+				//editOrder.setResponse(response);			
 			}
 			
 			}else{
@@ -595,7 +650,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("editPickup");
 				response.setProcessDesc("Error : No Have CarLicence");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : No Have CarLicence");
+				
+				//editOrder.setResponse(response);
 			}
 		
 		
@@ -640,13 +700,23 @@ public class PickupController {
 							response.setIsSuccess(true);
 							response.setProcess("delPickup");
 							response.setProcessDesc("Successfull");
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(true);
+							editOrder.setError(false);
+							editOrder.setMessage("");
+							
+							//editOrder.setResponse(response);
 						} catch (Exception e) {
 							isSuccess=false;
 							response.setIsSuccess(false);
 							response.setProcess("delPickup");
 							response.setProcessDesc("Error : "+e.getMessage());
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(false);
+							editOrder.setError(true);
+							editOrder.setMessage("Error : "+e.getMessage());
+							
+							//editOrder.setResponse(response);
 						}finally{
 							ds.close();
 						}
@@ -655,7 +725,12 @@ public class PickupController {
 					response.setIsSuccess(false);
 					response.setProcess("delPickup");
 					response.setProcessDesc("Error : Queue status is uesd");
-					editOrder.setResponse(response);
+					
+					editOrder.setSuccess(false);
+					editOrder.setError(true);
+					editOrder.setMessage("Error : Queue status is uesd");
+					
+					//editOrder.setResponse(response);
 				}
 					
 				
@@ -664,7 +739,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("delPickup");
 				response.setProcessDesc("Error : Queue is cancel");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : Queue is cancel");
+				
+				//editOrder.setResponse(response);
 			}
 
 			}else{
@@ -672,7 +752,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("delPickup");
 				response.setProcessDesc("Error : No Have Queue ID");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : No Have Queue ID");
+				
+				//editOrder.setResponse(response);
 			}
 		
 		System.out.println("Update :"+response.getProcessDesc()+" this que is "+getQueue.getStatus());
@@ -718,13 +803,23 @@ public class PickupController {
 							response.setIsSuccess(true);
 							response.setProcess("delPickup");
 							response.setProcessDesc("Successfull");
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(true);
+							editOrder.setError(false);
+							editOrder.setMessage("");
+							
+							//editOrder.setResponse(response);
 						} catch (Exception e) {
 							isSuccess=false;
 							response.setIsSuccess(false);
 							response.setProcess("delPickup");
 							response.setProcessDesc("Error : "+e.getMessage());
-							editOrder.setResponse(response);
+							
+							editOrder.setSuccess(false);
+							editOrder.setError(true);
+							editOrder.setMessage("Error : "+e.getMessage());
+							
+							//editOrder.setResponse(response);
 						}finally{
 							ds.close();
 						}
@@ -733,7 +828,12 @@ public class PickupController {
 					response.setIsSuccess(false);
 					response.setProcess("delPickup");
 					response.setProcessDesc("Error : Queue status is uesd");
-					editOrder.setResponse(response);
+					
+					editOrder.setSuccess(false);
+					editOrder.setError(true);
+					editOrder.setMessage("Error : No Have Queue ID");
+					
+					//editOrder.setResponse(response);
 				}
 					
 				
@@ -742,7 +842,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("delPickup");
 				response.setProcessDesc("Error : Queue is cancel");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : Queue is cancel");
+				
+				//editOrder.setResponse(response);
 			}
 
 			}else{
@@ -750,7 +855,12 @@ public class PickupController {
 				response.setIsSuccess(false);
 				response.setProcess("delPickup");
 				response.setProcessDesc("Error : No Have Queue ID");
-				editOrder.setResponse(response);
+				
+				editOrder.setSuccess(false);
+				editOrder.setError(true);
+				editOrder.setMessage("Error : No Have Queue ID");
+				
+				//editOrder.setResponse(response);
 			}
 		
 		System.out.println("Update :"+response.getProcessDesc()+" this que is "+getQueue.getStatus());
